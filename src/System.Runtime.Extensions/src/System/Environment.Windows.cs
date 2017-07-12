@@ -137,143 +137,189 @@ namespace System
             {
                 case SpecialFolder.ApplicationData:
                     folderGuid = Interop.Shell32.KnownFolders.RoamingAppData;
+                    // Windows.Storage.UserDataPaths.RoamingAppData
                     break;
                 case SpecialFolder.CommonApplicationData:
                     folderGuid = Interop.Shell32.KnownFolders.ProgramData;
+                    // Windows.Storage.AppDataPaths.ProgramData
                     break;
                 case SpecialFolder.LocalApplicationData:
                     folderGuid = Interop.Shell32.KnownFolders.LocalAppData;
+                    // Windows.Storage.AppDataPaths.LocalAppData
                     break;
                 case SpecialFolder.Cookies:
                     folderGuid = Interop.Shell32.KnownFolders.Cookies;
+                    // Windows.Storage.AppDataPaths.Cookies
                     break;
                 case SpecialFolder.Desktop:
                     folderGuid = Interop.Shell32.KnownFolders.Desktop;
+                    // Windows.Storage.AppDataPaths.Desktop
                     break;
                 case SpecialFolder.Favorites:
                     folderGuid = Interop.Shell32.KnownFolders.Favorites;
+                    // Windows.Storage.AppDataPaths.Favorites
                     break;
                 case SpecialFolder.History:
                     folderGuid = Interop.Shell32.KnownFolders.History;
+                    // Windows.Storage.AppDataPaths.History
                     break;
                 case SpecialFolder.InternetCache:
                     folderGuid = Interop.Shell32.KnownFolders.InternetCache;
+                    // Windows.Storage.AppDataPaths.InternetCache
                     break;
                 case SpecialFolder.Programs:
                     folderGuid = Interop.Shell32.KnownFolders.Programs;
+                    // TODO:NA
                     break;
                 case SpecialFolder.MyComputer:
                     folderGuid = Interop.Shell32.KnownFolders.ComputerFolder;
+                    // TODO:NA
                     break;
                 case SpecialFolder.MyMusic:
                     folderGuid = Interop.Shell32.KnownFolders.Music;
+                    // Windows.Storage.UserDataPaths.Music
                     break;
                 case SpecialFolder.MyPictures:
                     folderGuid = Interop.Shell32.KnownFolders.Pictures;
+                    // Windows.Storage.UserDataPaths.Pictures
                     break;
                 case SpecialFolder.MyVideos:
                     folderGuid = Interop.Shell32.KnownFolders.Videos;
+                    // Windows.Storage.UserDataPaths.Videos
                     break;
                 case SpecialFolder.Recent:
                     folderGuid = Interop.Shell32.KnownFolders.Recent;
+                    // Windows.Storage.UserDataPaths.Recent
                     break;
                 case SpecialFolder.SendTo:
                     folderGuid = Interop.Shell32.KnownFolders.SendTo;
+                    // TODO:NA
                     break;
                 case SpecialFolder.StartMenu:
                     folderGuid = Interop.Shell32.KnownFolders.StartMenu;
+                    // TODO:NA
                     break;
                 case SpecialFolder.Startup:
                     folderGuid = Interop.Shell32.KnownFolders.Startup;
+                    // TODO:NA
                     break;
                 case SpecialFolder.System:
                     folderGuid = Interop.Shell32.KnownFolders.System;
+                    // Windows.Storage.SystemDataPaths.System
                     break;
                 case SpecialFolder.Templates:
                     folderGuid = Interop.Shell32.KnownFolders.Templates;
+                    // Windows.Storage.UserDataPaths.Templates
                     break;
                 case SpecialFolder.DesktopDirectory:
                     folderGuid = Interop.Shell32.KnownFolders.Desktop;
+                    // Windows.Storage.UserDataPaths.Desktop
                     break;
                 case SpecialFolder.Personal:
                     // Same as Personal
                     // case SpecialFolder.MyDocuments:
                     folderGuid = Interop.Shell32.KnownFolders.Documents;
+                    // Windows.Storage.UserDataPaths.Documents
                     break;
                 case SpecialFolder.ProgramFiles:
                     folderGuid = Interop.Shell32.KnownFolders.ProgramFiles;
+                    // TODO:NA
                     break;
                 case SpecialFolder.CommonProgramFiles:
                     folderGuid = Interop.Shell32.KnownFolders.ProgramFilesCommon;
+                    // TODO:NA
                     break;
                 case SpecialFolder.AdminTools:
                     folderGuid = Interop.Shell32.KnownFolders.AdminTools;
+                    // TODO:NA
                     break;
                 case SpecialFolder.CDBurning:
                     folderGuid = Interop.Shell32.KnownFolders.CDBurning;
+                    // TODO:NA
                     break;
                 case SpecialFolder.CommonAdminTools:
                     folderGuid = Interop.Shell32.KnownFolders.CommonAdminTools;
+                    // TODO:NA
                     break;
                 case SpecialFolder.CommonDocuments:
                     folderGuid = Interop.Shell32.KnownFolders.PublicDocuments;
+                    // Windows.Storage.SystemDataPaths.PublicDocuments
                     break;
                 case SpecialFolder.CommonMusic:
                     folderGuid = Interop.Shell32.KnownFolders.PublicMusic;
+                    // Windows.Storage.SystemDataPaths.PublicMusic
                     break;
                 case SpecialFolder.CommonOemLinks:
                     folderGuid = Interop.Shell32.KnownFolders.CommonOEMLinks;
+                    // TODO:NA
                     break;
                 case SpecialFolder.CommonPictures:
                     folderGuid = Interop.Shell32.KnownFolders.PublicPictures;
+                    // Windows.Storage.SystemDataPaths.PublicPictures
                     break;
                 case SpecialFolder.CommonStartMenu:
                     folderGuid = Interop.Shell32.KnownFolders.CommonStartMenu;
+                    // TODO:NA
                     break;
                 case SpecialFolder.CommonPrograms:
                     folderGuid = Interop.Shell32.KnownFolders.CommonPrograms;
+                    // TODO:NA
                     break;
                 case SpecialFolder.CommonStartup:
                     folderGuid = Interop.Shell32.KnownFolders.CommonStartup;
+                    // TODO:NA
                     break;
                 case SpecialFolder.CommonDesktopDirectory:
                     folderGuid = Interop.Shell32.KnownFolders.PublicDesktop;
+                    // Windows.Storage.SystemDataPaths.PublicDesktop
                     break;
                 case SpecialFolder.CommonTemplates:
                     folderGuid = Interop.Shell32.KnownFolders.CommonTemplates;
+                    // TODO:NA
                     break;
                 case SpecialFolder.CommonVideos:
                     folderGuid = Interop.Shell32.KnownFolders.PublicVideos;
+                    // Windows.Storage.SystemDataPaths.PublicVideos
                     break;
                 case SpecialFolder.Fonts:
                     folderGuid = Interop.Shell32.KnownFolders.Fonts;
+                    // TODO:NA
                     break;
                 case SpecialFolder.NetworkShortcuts:
                     folderGuid = Interop.Shell32.KnownFolders.NetHood;
+                    // TODO:NA
                     break;
                 case SpecialFolder.PrinterShortcuts:
                     folderGuid = Interop.Shell32.KnownFolders.PrintersFolder;
+                    // TODO:NA
                     break;
                 case SpecialFolder.UserProfile:
                     folderGuid = Interop.Shell32.KnownFolders.Profile;
+                    // Windows.Storage.UserDataPaths.Profile
                     break;
                 case SpecialFolder.CommonProgramFilesX86:
                     folderGuid = Interop.Shell32.KnownFolders.ProgramFilesCommonX86;
+                    // TODO:NA
                     break;
                 case SpecialFolder.ProgramFilesX86:
                     folderGuid = Interop.Shell32.KnownFolders.ProgramFilesX86;
+                    // TODO:NA
                     break;
                 case SpecialFolder.Resources:
                     folderGuid = Interop.Shell32.KnownFolders.ResourceDir;
+                    // TODO:NA
                     break;
                 case SpecialFolder.LocalizedResources:
                     folderGuid = Interop.Shell32.KnownFolders.LocalizedResourcesDir;
+                    // TODO:NA
                     break;
                 case SpecialFolder.SystemX86:
                     folderGuid = Interop.Shell32.KnownFolders.SystemX86;
+                    // Windows.Storage.SystemDataPaths.SystemX86
                     break;
                 case SpecialFolder.Windows:
                     folderGuid = Interop.Shell32.KnownFolders.Windows;
+                    // Windows.Storage.SystemDataPaths.Windows
                     break;
                 default:
                     return string.Empty;
