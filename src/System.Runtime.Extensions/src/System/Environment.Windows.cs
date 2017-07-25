@@ -136,9 +136,9 @@ namespace System
             switch (folder)
             {
                 case SpecialFolder.ApplicationData:
-                    folderGuid = Interop.Shell32.KnownFolders.RoamingAppData;
-                    // Windows.Storage.UserDataPaths.RoamingAppData
-                    break;
+                    //folderGuid = Interop.Shell32.KnownFolders.RoamingAppData;
+                    return Windows.Storage.UserDataPaths.RoamingAppData;
+                    // break;
                 case SpecialFolder.CommonApplicationData:
                     folderGuid = Interop.Shell32.KnownFolders.ProgramData;
                     // Windows.Storage.AppDataPaths.ProgramData
