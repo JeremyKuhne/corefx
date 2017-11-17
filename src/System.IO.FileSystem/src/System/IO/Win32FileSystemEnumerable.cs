@@ -584,8 +584,9 @@ namespace System.IO
             {
                 if (Win32FileSystemEnumerableHelpers.IsFile(ref findData))
                 {
-                    string fullPathFinal = Path.Combine(fullPath, findData.cFileName.GetStringFromFixedBuffer());
-                    result = new FileInfo(fullPathFinal, ref findData);
+                    string fileName = findData.cFileName.GetStringFromFixedBuffer();
+                    fullPath = PathHelpers.CombineNoChecks(fullPath, fileName);
+                    result = new FileInfo(fullPath, ref findData);
                     return true;
                 }
 
@@ -601,8 +602,8 @@ namespace System.IO
             {
                 if (Win32FileSystemEnumerableHelpers.IsDir(ref findData))
                 {
-                    string fullPathFinal = Path.Combine(fullPath, findData.cFileName.GetStringFromFixedBuffer());
-                    result = new DirectoryInfo(fullPathFinal, ref findData);
+                    fullPath = Path.Combine(fullPath, findData.cFileName.GetStringFromFixedBuffer());
+                    result = new DirectoryInfo(fullPath, ref findData);
                     return true;
                 }
 

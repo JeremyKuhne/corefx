@@ -15,7 +15,6 @@ namespace System.IO
 
         public override void CopyFile(string sourceFullPath, string destFullPath, bool overwrite)
         {
-            Interop.Kernel32.SECURITY_ATTRIBUTES secAttrs = default(Interop.Kernel32.SECURITY_ATTRIBUTES);
             int errorCode = Interop.Kernel32.CopyFile(sourceFullPath, destFullPath, !overwrite);
 
             if (errorCode != Interop.Errors.ERROR_SUCCESS)
@@ -27,7 +26,7 @@ namespace System.IO
                     // For a number of error codes (sharing violation, path 
                     // not found, etc) we don't know if the problem was with
                     // the source or dest file.  Try reading the source file.
-                    using (SafeFileHandle handle = Interop.Kernel32.UnsafeCreateFile(sourceFullPath, GENERIC_READ, FileShare.Read, ref secAttrs, FileMode.Open, 0, IntPtr.Zero))
+                    using (SafeFileHandle handle = Interop.Kernel32.UnsafeCreateFile(sourceFullPath, GENERIC_READ, FileShare.Read, FileMode.Open, 0))
                     {
                         if (handle.IsInvalid)
                             fileName = sourceFullPath;
@@ -389,15 +388,12 @@ namespace System.IO
                 throw new ArgumentException(SR.Arg_PathIsVolume, "path");
             }
 
-            Interop.Kernel32.SECURITY_ATTRIBUTES secAttrs = default(Interop.Kernel32.SECURITY_ATTRIBUTES);
             SafeFileHandle handle = Interop.Kernel32.SafeCreateFile(
                 fullPath,
                 Interop.Kernel32.GenericOperations.GENERIC_WRITE,
                 FileShare.ReadWrite | FileShare.Delete,
-                ref secAttrs,
                 FileMode.Open,
-                asDirectory ? Interop.Kernel32.FileOperations.FILE_FLAG_BACKUP_SEMANTICS : (int)FileOptions.None,
-                IntPtr.Zero
+                asDirectory ? Interop.Kernel32.FileOperations.FILE_FLAG_BACKUP_SEMANTICS : (int)FileOptions.None
             );
 
             if (handle.IsInvalid)

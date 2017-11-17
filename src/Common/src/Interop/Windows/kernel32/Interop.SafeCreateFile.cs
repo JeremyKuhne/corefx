@@ -20,12 +20,10 @@ internal partial class Interop
             string lpFileName,
             int dwDesiredAccess,
             System.IO.FileShare dwShareMode,
-            ref SECURITY_ATTRIBUTES securityAttrs,
             FileMode dwCreationDisposition,
-            int dwFlagsAndAttributes,
-            IntPtr hTemplateFile)
+            int dwFlagsAndAttributes)
         {
-            SafeFileHandle handle = UnsafeCreateFile(lpFileName, dwDesiredAccess, dwShareMode, ref securityAttrs, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
+            SafeFileHandle handle = UnsafeCreateFile(lpFileName, dwDesiredAccess, dwShareMode, dwCreationDisposition, dwFlagsAndAttributes);
 
             if (!handle.IsInvalid)
             {

@@ -18,6 +18,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
+    <Compile Include="System\IO\CharSpanExtensions.Unix.cs" />
+    <Compile Include="System\IO\CharSpanExtensions.Windows.cs" />
+    <Compile Include="System\IO\CharSpanExtensions.cs" />
+    <Compile Include="System\IO\DosMatcher.cs" />
     <Compile Include="System\IO\Error.cs" />
     <Compile Include="System\IO\Directory.cs" />
     <Compile Include="System\IO\DirectoryInfo.cs" />
@@ -25,10 +29,24 @@
     <Compile Include="System\IO\FileInfo.cs" />
     <Compile Include="System\IO\FileSystem.cs" />
     <Compile Include="System\IO\FileSystemInfo.cs" />
+    <Compile Include="System\IO\FindFilters.All.cs" />
+    <Compile Include="System\IO\FindFilters.cs" />
+    <Compile Include="System\IO\FindFilters.DosMatch.cs" />
+    <Compile Include="System\IO\FindFilters.Multiple.cs" />
+    <Compile Include="System\IO\FindFilters.NotRelativeDirectory.cs" />
+    <Compile Include="System\IO\FindOperation.cs" />
+    <Compile Include="System\IO\FindTransforms.cs" />
+    <Compile Include="System\IO\FindTransforms.ToDirectoryInfo.cs" />
+    <Compile Include="System\IO\FindTransforms.ToFileInfo.cs" />
+    <Compile Include="System\IO\FindTransforms.ToFileSystemInfo.cs" />
+    <Compile Include="System\IO\FindTransforms.ToUserFullPath.cs" />
     <Compile Include="System\IO\IFileSystemObject.cs" />
+    <Compile Include="System\IO\IFindFilter.cs" />
+    <Compile Include="System\IO\IFindTransform.cs" />
     <Compile Include="System\IO\Iterator.cs" />
     <Compile Include="System\IO\PathHelpers.cs" />
     <Compile Include="System\IO\PathPair.cs" />
+    <Compile Include="System\IO\RawFindData.cs" />
     <Compile Include="System\IO\ReadLinesIterator.cs" />
     <Compile Include="System\IO\SearchOption.cs" />
     <Compile Include="System\IO\SearchTarget.cs" />
@@ -198,6 +216,9 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.DeleteFile.cs">
       <Link>Common\Interop\Windows\Interop.DeleteFile.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CompareStringOrdinal.cs">
+      <Link>Common\Interop\Windows\Interop.CompareStringOrdinal.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CreateDirectory.cs">
       <Link>Common\Interop\Windows\Interop.CreateDirectory.cs</Link>
     </Compile>
@@ -225,14 +246,26 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CopyFileEx.cs">
       <Link>Common\Interop\Windows\Interop.CopyFileEx.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\NtDll\Interop.FILE_FULL_DIR_INFORMATION.cs">
+      <Link>Common\Interop\Windows\Interop.FILE_FULL_DIR_INFORMATION.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetFileInformationByHandleEx.cs">
+      <Link>Common\Interop\Windows\Interop.GetFileInformationByHandleEx.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.FILE_INFO_BY_HANDLE_CLASS.cs">
+      <Link>Common\Interop\Windows\Interop.FILE_INFO_BY_HANDLE_CLASS.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.LongFileTime.cs">
+      <Link>Common\Interop\Windows\Interop.LongFileTime.cs</Link>
+    </Compile>
   </ItemGroup>
   <!-- Windows : Win32 only -->
   <ItemGroup Condition="'$(TargetsWindows)' == 'true' and '$(UWPCompatible)' != 'true'">
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.UnsafeCreateFile.cs">
       <Link>Common\Interop\Windows\Interop.UnsafeCreateFile.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CreateFile.cs">
-      <Link>Common\Interop\Windows\Interop.CreateFile.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CreateFile_IntPtr.cs">
+      <Link>Common\Interop\Windows\Interop.CreateFile_IntPtr.cs</Link>
     </Compile>
   </ItemGroup>
   <!-- Windows : UAP - Win32 + WinRT -->
@@ -376,6 +409,7 @@
     <Reference Include="System.Text.Encoding.Extensions" />
     <Reference Include="System.Threading.Overlapped" />
     <Reference Include="System.Threading.Tasks" />
+    <Reference Include="System.Threading" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
     <Reference Include="System.Threading" />

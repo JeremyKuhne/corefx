@@ -15,12 +15,10 @@ internal partial class Interop
             string lpFileName,
             int dwDesiredAccess,
             FileShare dwShareMode,
-            ref Interop.Kernel32.SECURITY_ATTRIBUTES securityAttrs,
             FileMode dwCreationDisposition,
-            int dwFlagsAndAttributes,
-            IntPtr hTemplateFile)
+            int dwFlagsAndAttributes)
         {
-            return CreateFile(lpFileName, dwDesiredAccess, dwShareMode, ref securityAttrs, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
+            return new SafeFileHandle(CreateFile(lpFileName, dwDesiredAccess, dwShareMode, dwCreationDisposition, dwFlagsAndAttributes), ownsHandle: true);
         }
     }
 }

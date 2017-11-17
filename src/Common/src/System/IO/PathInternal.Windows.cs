@@ -118,9 +118,9 @@ namespace System.IO
 
             // Given \\server\share in longpath becomes \\?\UNC\server\share
             if (path.StartsWith(UncPathPrefix, StringComparison.OrdinalIgnoreCase))
-                return path.Insert(2, PathInternal.UncExtendedPrefixToInsert);
+                return path.Insert(2, UncExtendedPrefixToInsert);
 
-            return PathInternal.ExtendedPathPrefix + path;
+            return ExtendedPathPrefix + path;
         }
 
         /// <summary>
@@ -192,7 +192,7 @@ namespace System.IO
         internal static unsafe bool HasWildCardCharacters(string path)
         {
             // Question mark is part of dos device syntax so we have to skip if we are
-            int startIndex = PathInternal.IsDevice(path) ? ExtendedPathPrefix.Length : 0;
+            int startIndex = IsDevice(path) ? ExtendedPathPrefix.Length : 0;
 
             return path.IndexOfAny(s_wildcardChars, startIndex) >= 0;
         }
