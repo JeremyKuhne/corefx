@@ -134,7 +134,7 @@ namespace System.IO
                 if (_lastEntryFound)
                     return false;
 
-                RawFindData<TState> findData = default;
+                FindData<TState> findData = default;
                 do
                 {
                     FindNextFile();
@@ -158,7 +158,7 @@ namespace System.IO
                             }
                         }
 
-                        findData = new RawFindData<TState>(_info, _currentPath, _originalFullPath, _originalUserPath, _state);
+                        findData = new FindData<TState>(_info, _currentPath, _originalFullPath, _originalUserPath, _state);
                     }
                 } while (!_lastEntryFound && !_predicate(ref findData));
 

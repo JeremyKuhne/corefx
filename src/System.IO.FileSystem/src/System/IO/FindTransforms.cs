@@ -6,19 +6,19 @@ namespace System.IO
 {
     internal static partial class FindTransforms
     {
-        internal static DirectoryInfo AsDirectoryInfo<TState>(ref RawFindData<TState> findData)
+        internal static DirectoryInfo AsDirectoryInfo<TState>(ref FindData<TState> findData)
         {
             string fileName = new string(findData.FileName);
             return DirectoryInfo.Create(PathHelpers.CombineNoChecks(findData.Directory, fileName), fileName, ref findData);
         }
 
-        internal static FileInfo AsFileInfo<TState>(ref RawFindData<TState> findData)
+        internal static FileInfo AsFileInfo<TState>(ref FindData<TState> findData)
         {
             string fileName = new string(findData.FileName);
             return FileInfo.Create(PathHelpers.CombineNoChecks(findData.Directory, fileName), fileName, ref findData);
         }
 
-        internal static FileSystemInfo AsFileSystemInfo<TState>(ref RawFindData<TState> findData)
+        internal static FileSystemInfo AsFileSystemInfo<TState>(ref FindData<TState> findData)
         {
             string fileName = new string(findData.FileName);
             string fullPath = PathHelpers.CombineNoChecks(findData.Directory, fileName);
@@ -31,7 +31,7 @@ namespace System.IO
         /// <summary>
         /// Returns the full path for find results, based off of the initially provided path.
         /// </summary>
-        internal static string AsUserFullPath<TState>(ref RawFindData<TState> findData)
+        internal static string AsUserFullPath<TState>(ref FindData<TState> findData)
         {
             ReadOnlySpan<char> subdirectory = findData.Directory.AsReadOnlySpan().Slice(findData.OriginalDirectory.Length);
             return PathHelpers.CombineNoChecks(findData.OriginalUserDirectory, subdirectory, findData.FileName);
