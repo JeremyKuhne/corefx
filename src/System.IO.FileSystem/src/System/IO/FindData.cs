@@ -7,7 +7,7 @@ namespace System.IO
     /// <summary>
     /// Used for processing and filtering find results.
     /// </summary>
-    internal unsafe ref struct FindData<TState>
+    public unsafe ref struct FindData<TState>
     {
         internal FindData(Interop.NtDll.FILE_FULL_DIR_INFORMATION* info, string directory, string originalDirectory, string originalUserDirectory, TState state)
         {

@@ -7,5 +7,5 @@ namespace System.IO
     /// <summary>
     /// Delegate for transforming raw find data into a result.
     /// </summary>
-    internal delegate TResult FindTransform<TResult, TState>(ref FindData<TState> findData);
+    public delegate TResult FindTransform<TResult, TState>(ref FindData<TState> findData);
 }

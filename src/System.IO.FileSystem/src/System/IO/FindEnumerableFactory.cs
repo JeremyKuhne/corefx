@@ -46,7 +46,7 @@ namespace System.IO
                         && DosMatcher.MatchPattern(findData.State, findData.FileName, ignoreCase: true);
                 },
                 DosMatcher.TranslateExpression(expression),
-                recursive);
+                recursive ? FindOptions.Recurse : FindOptions.None);
         }
 
         internal static FindEnumerable<string, string> UserDirectories(string directory,
@@ -63,7 +63,7 @@ namespace System.IO
                         && DosMatcher.MatchPattern(findData.State, findData.FileName, ignoreCase: true);
                 },
                 DosMatcher.TranslateExpression(expression),
-                recursive);
+                recursive ? FindOptions.Recurse : FindOptions.None);
         }
 
         internal static FindEnumerable<string, string> UserEntries(string directory,
@@ -79,7 +79,7 @@ namespace System.IO
                         && DosMatcher.MatchPattern(findData.State, findData.FileName, ignoreCase: true);
                 },
                 DosMatcher.TranslateExpression(expression),
-                recursive);
+                recursive ? FindOptions.Recurse : FindOptions.None);
         }
 
         internal static FindEnumerable<FileInfo, string> FileInfos(
@@ -97,7 +97,7 @@ namespace System.IO
                         && DosMatcher.MatchPattern(findData.State, findData.FileName, ignoreCase: true);
                 },
                 DosMatcher.TranslateExpression(expression),
-                recursive);
+                recursive ? FindOptions.Recurse : FindOptions.None);
         }
 
         internal static FindEnumerable<DirectoryInfo, string> DirectoryInfos(
@@ -115,7 +115,7 @@ namespace System.IO
                        && DosMatcher.MatchPattern(findData.State, findData.FileName, ignoreCase: true);
                },
                DosMatcher.TranslateExpression(expression),
-               recursive);
+               recursive ? FindOptions.Recurse : FindOptions.None);
         }
 
         internal static FindEnumerable<FileSystemInfo, string> FileSystemInfos(
@@ -132,7 +132,7 @@ namespace System.IO
                        && DosMatcher.MatchPattern(findData.State, findData.FileName, ignoreCase: true);
                },
                DosMatcher.TranslateExpression(expression),
-               recursive);
+               recursive ? FindOptions.Recurse : FindOptions.None);
         }
     }
 }

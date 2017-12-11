@@ -211,4 +211,28 @@ namespace System.IO
         AllDirectories = 1,
         TopDirectoryOnly = 0,
     }
+    [Flags]
+    public enum FindOptions
+    {
+        None = 0x0,
+        Recurse = 0x0000_0001,
+        IgnoreInaccessable = 0x0000_0002,
+        UseLargeBuffer = 0x0000_0004,
+        AvoidLocking = 0x0000_0008,
+    }
+    public delegate bool FindPredicate<TState>(ref FindData<TState> findData);
+    public delegate TResult FindTransform<TResult, TState>(ref FindData<TState> findData);
+    public ref struct FindData<TState>
+    {
+        public string Directory { get { throw null; } }
+        public string OriginalDirectory { get { throw null; } }
+        public string OriginalUserDirectory { get { throw null; } }
+        public TState State { get { throw null; } }
+        public ReadOnlySpan<char> FileName { get { throw null; } }
+        public FileAttributes Attributes { get { throw null; } }
+        public long Length { get { throw null; } }
+        public DateTime CreationTimeUtc { get { throw null; } }
+        public DateTime LastAccessTimeUtc { get { throw null; } }
+        public DateTime LastWriteTimeUtc { get { throw null; } }
+    }
 }

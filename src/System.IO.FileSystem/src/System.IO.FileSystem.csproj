@@ -26,6 +26,7 @@
     <Compile Include="System\IO\File.cs" />
     <Compile Include="System\IO\FileInfo.cs" />
     <Compile Include="System\IO\FileSystemInfo.cs" />
+    <Compile Include="System\IO\FindOptions.cs" />
     <Compile Include="System\IO\Iterator.cs" />
     <Compile Include="System\IO\PathHelpers.cs" />
     <Compile Include="System\IO\PathPair.cs" />

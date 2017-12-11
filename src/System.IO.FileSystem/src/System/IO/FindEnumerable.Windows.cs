@@ -12,11 +12,11 @@ using System.Threading;
 
 namespace System.IO
 {
-    internal unsafe partial class FindEnumerable<TResult, TState> : CriticalFinalizerObject, IEnumerable<TResult>, IEnumerator<TResult>
+    public unsafe partial class FindEnumerable<TResult, TState> : CriticalFinalizerObject, IEnumerable<TResult>, IEnumerator<TResult>
     {
         private readonly string _originalFullPath;
         private readonly string _originalUserPath;
-        private readonly bool _recursive;
+        private readonly FindOptions _options;
         private readonly FindTransform<TResult, TState> _transform;
         private readonly FindPredicate<TState> _predicate;
         private readonly TState _state;
@@ -43,11 +43,11 @@ namespace System.IO
             FindTransform<TResult, TState> transform,
             FindPredicate<TState> predicate,
             TState state = default,
-            bool recursive = false)
+            FindOptions options = FindOptions.None)
         {
             _originalUserPath = directory;
             _originalFullPath = Path.GetFullPath(directory);
-            _recursive = recursive;
+            _options = options;
             _predicate = predicate ?? throw new ArgumentNullException(nameof(predicate));
             _transform = transform ?? throw new ArgumentNullException(nameof(transform));
             _state = state;
@@ -60,14 +60,14 @@ namespace System.IO
             FindTransform<TResult, TState> transform,
             FindPredicate<TState> predicate,
             TState state,
-            bool recursive)
+            FindOptions options)
         {
             _originalUserPath = originalUserPath;
             _originalFullPath = originalFullPath;
             _predicate = predicate;
             _transform = transform;
             _state = state;
-            _recursive = recursive;
+            _options = options;
             Initialize();
         }
 
@@ -104,7 +104,7 @@ namespace System.IO
             }
             else
             {
-                return new FindEnumerable<TResult, TState>(_originalUserPath, _originalFullPath, _transform, _predicate, _state, _recursive);
+                return new FindEnumerable<TResult, TState>(_originalUserPath, _originalFullPath, _transform, _predicate, _state, _options);
             }
         }
 
@@ -113,7 +113,7 @@ namespace System.IO
             _currentPath = _originalFullPath;
             _buffer = ArrayPool<byte>.Shared.Rent(4096);
             _pinnedBuffer = GCHandle.Alloc(_buffer, GCHandleType.Pinned);
-            if (_recursive)
+            if ((_options & FindOptions.Recurse) != 0)
                 _pending = new Queue<(IntPtr, string)>();
             _directoryHandle = CreateDirectoryHandle(_originalFullPath);
         }
@@ -141,7 +141,7 @@ namespace System.IO
                     if (!_lastEntryFound && _info != null)
                     {
                         // If needed, stash any subdirectories to process later
-                        if (_recursive && (_info->FileAttributes & FileAttributes.Directory) != 0
+                        if ((_options & FindOptions.Recurse) != 0 && (_info->FileAttributes & FileAttributes.Directory) != 0
                             && !PathHelpers.IsDotOrDotDot(_info->FileName))
                         {
                             string subDirectory = PathHelpers.CombineNoChecks(_currentPath, _info->FileName);
@@ -225,7 +225,7 @@ namespace System.IO
                     Interop.Kernel32.CloseHandle(_directoryHandle);
                     _directoryHandle = IntPtr.Zero;
 
-                    if (_recursive && _pending != null)
+                    if ((_options & FindOptions.Recurse) != 0 && _pending != null)
                     {
                         while (_pending.Count > 0)
                             Interop.Kernel32.CloseHandle(_pending.Dequeue().Handle);
