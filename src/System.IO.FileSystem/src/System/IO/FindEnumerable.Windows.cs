@@ -5,6 +5,7 @@
 using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
@@ -19,6 +20,7 @@ namespace System.IO
         private readonly FindOptions _options;
         private readonly FindTransform<TResult, TState> _transform;
         private readonly FindPredicate<TState> _predicate;
+        private readonly FindPredicate<TState> _recursePredicate;
         private readonly TState _state;
 
         private object _lock = new object();
@@ -42,6 +44,8 @@ namespace System.IO
             string directory,
             FindTransform<TResult, TState> transform,
             FindPredicate<TState> predicate,
+            // Only used if FindOptions.Recurse is set. Default is to always recurse.
+            FindPredicate<TState> recursePredicate = null,
             TState state = default,
             FindOptions options = FindOptions.None)
         {
@@ -50,6 +54,7 @@ namespace System.IO
             _options = options;
             _predicate = predicate ?? throw new ArgumentNullException(nameof(predicate));
             _transform = transform ?? throw new ArgumentNullException(nameof(transform));
+            _recursePredicate = recursePredicate;
             _state = state;
             Initialize();
         }
@@ -59,12 +64,14 @@ namespace System.IO
             string originalFullPath,
             FindTransform<TResult, TState> transform,
             FindPredicate<TState> predicate,
+            FindPredicate<TState> recursePredicate,
             TState state,
             FindOptions options)
         {
             _originalUserPath = originalUserPath;
             _originalFullPath = originalFullPath;
             _predicate = predicate;
+            _recursePredicate = recursePredicate;
             _transform = transform;
             _state = state;
             _options = options;
@@ -74,7 +81,7 @@ namespace System.IO
         /// <summary>
         /// Simple wrapper to allow creating a file handle for an existing directory.
         /// </summary>
-        public static IntPtr CreateDirectoryHandle(string path)
+        private IntPtr CreateDirectoryHandle(string path)
         {
             IntPtr handle = Interop.Kernel32.CreateFile_IntPtr(
                 path,
@@ -87,8 +94,18 @@ namespace System.IO
             {
                 // Historically we throw directory not found rather than file not found
                 int error = Marshal.GetLastWin32Error();
-                if (error == Interop.Errors.ERROR_FILE_NOT_FOUND)
-                    error = Interop.Errors.ERROR_PATH_NOT_FOUND;
+                switch (error)
+                {
+                    case Interop.Errors.ERROR_ACCESS_DENIED:
+                        if ((_options & FindOptions.IgnoreInaccessable) != 0)
+                        {
+                            return IntPtr.Zero;
+                        }
+                        break;
+                    case Interop.Errors.ERROR_FILE_NOT_FOUND:
+                        error = Interop.Errors.ERROR_PATH_NOT_FOUND;
+                        break;
+                }
 
                 throw Win32Marshal.GetExceptionForWin32Error(error, path);
             }
@@ -98,13 +115,19 @@ namespace System.IO
 
         public IEnumerator<TResult> GetEnumerator()
         {
+            if (_directoryHandle == IntPtr.Zero)
+            {
+                // We didn't have rights to access the root directory and the flag was set appropriately
+                return Enumerable.Empty<TResult>().GetEnumerator();
+            }
+
             if (Interlocked.Exchange(ref _enumeratorCreated, 1) == 0)
             {
                 return this;
             }
             else
             {
-                return new FindEnumerable<TResult, TState>(_originalUserPath, _originalFullPath, _transform, _predicate, _state, _options);
+                return new FindEnumerable<TResult, TState>(_originalUserPath, _originalFullPath, _transform, _predicate, _recursePredicate, _state, _options);
             }
         }
 
@@ -142,19 +165,23 @@ namespace System.IO
                     {
                         // If needed, stash any subdirectories to process later
                         if ((_options & FindOptions.Recurse) != 0 && (_info->FileAttributes & FileAttributes.Directory) != 0
-                            && !PathHelpers.IsDotOrDotDot(_info->FileName))
+                            && !PathHelpers.IsDotOrDotDot(_info->FileName)
+                            && (_recursePredicate == null || _recursePredicate(ref findData)))
                         {
                             string subDirectory = PathHelpers.CombineNoChecks(_currentPath, _info->FileName);
                             IntPtr subDirectoryHandle = CreateDirectoryHandle(subDirectory);
-                            try
+                            if (subDirectoryHandle != IntPtr.Zero)
                             {
-                                // It is possible this might allocate and run out of memory
-                                _pending.Enqueue((subDirectoryHandle, subDirectory));
-                            }
-                            catch
-                            {
-                                Interop.Kernel32.CloseHandle(subDirectoryHandle);
-                                throw;
+                                try
+                                {
+                                    // It is possible this might allocate and run out of memory
+                                    _pending.Enqueue((subDirectoryHandle, subDirectory));
+                                }
+                                catch
+                                {
+                                    Interop.Kernel32.CloseHandle(subDirectoryHandle);
+                                    throw;
+                                }
                             }
                         }
 

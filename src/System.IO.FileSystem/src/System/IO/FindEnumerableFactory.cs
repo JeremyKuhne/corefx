@@ -45,8 +45,8 @@ namespace System.IO
                         && !FindPredicates.IsDirectory(ref findData)
                         && DosMatcher.MatchPattern(findData.State, findData.FileName, ignoreCase: true);
                 },
-                DosMatcher.TranslateExpression(expression),
-                recursive ? FindOptions.Recurse : FindOptions.None);
+                state: DosMatcher.TranslateExpression(expression),
+                options: recursive ? FindOptions.Recurse : FindOptions.None);
         }
 
         internal static FindEnumerable<string, string> UserDirectories(string directory,
@@ -62,8 +62,8 @@ namespace System.IO
                         && FindPredicates.IsDirectory(ref findData)
                         && DosMatcher.MatchPattern(findData.State, findData.FileName, ignoreCase: true);
                 },
-                DosMatcher.TranslateExpression(expression),
-                recursive ? FindOptions.Recurse : FindOptions.None);
+                state: DosMatcher.TranslateExpression(expression),
+                options: recursive ? FindOptions.Recurse : FindOptions.None);
         }
 
         internal static FindEnumerable<string, string> UserEntries(string directory,
@@ -78,8 +78,8 @@ namespace System.IO
                     return FindPredicates.NotDotOrDotDot(ref findData)
                         && DosMatcher.MatchPattern(findData.State, findData.FileName, ignoreCase: true);
                 },
-                DosMatcher.TranslateExpression(expression),
-                recursive ? FindOptions.Recurse : FindOptions.None);
+                state: DosMatcher.TranslateExpression(expression),
+                options: recursive ? FindOptions.Recurse : FindOptions.None);
         }
 
         internal static FindEnumerable<FileInfo, string> FileInfos(
@@ -96,8 +96,8 @@ namespace System.IO
                         && !FindPredicates.IsDirectory(ref findData)
                         && DosMatcher.MatchPattern(findData.State, findData.FileName, ignoreCase: true);
                 },
-                DosMatcher.TranslateExpression(expression),
-                recursive ? FindOptions.Recurse : FindOptions.None);
+                state: DosMatcher.TranslateExpression(expression),
+                options: recursive ? FindOptions.Recurse : FindOptions.None);
         }
 
         internal static FindEnumerable<DirectoryInfo, string> DirectoryInfos(
@@ -114,8 +114,8 @@ namespace System.IO
                        && FindPredicates.IsDirectory(ref findData)
                        && DosMatcher.MatchPattern(findData.State, findData.FileName, ignoreCase: true);
                },
-               DosMatcher.TranslateExpression(expression),
-               recursive ? FindOptions.Recurse : FindOptions.None);
+               state: DosMatcher.TranslateExpression(expression),
+               options: recursive ? FindOptions.Recurse : FindOptions.None);
         }
 
         internal static FindEnumerable<FileSystemInfo, string> FileSystemInfos(
@@ -131,8 +131,8 @@ namespace System.IO
                    return FindPredicates.NotDotOrDotDot(ref findData)
                        && DosMatcher.MatchPattern(findData.State, findData.FileName, ignoreCase: true);
                },
-               DosMatcher.TranslateExpression(expression),
-               recursive ? FindOptions.Recurse : FindOptions.None);
+               state: DosMatcher.TranslateExpression(expression),
+               options: recursive ? FindOptions.Recurse : FindOptions.None);
         }
     }
 }

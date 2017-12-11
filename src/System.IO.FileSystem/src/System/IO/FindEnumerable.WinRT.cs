@@ -24,9 +24,14 @@ namespace System.IO
                     case Interop.Errors.ERROR_NO_MORE_FILES:
                         DirectoryFinished();
                         return false;
-                    default:
-                        throw Win32Marshal.GetExceptionForWin32Error(error, _currentPath);
+                    case Interop.Errors.ERROR_ACCESS_DENIED:
+                        if ((_options & FindOptions.IgnoreInaccessable) != 0)
+                        {
+                            return IntPtr.Zero;
+                        }
                 }
+
+                throw Win32Marshal.GetExceptionForWin32Error(error, _currentPath);
             }
 
             return true;

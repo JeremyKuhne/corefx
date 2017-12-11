@@ -36,7 +36,16 @@ namespace System.IO
                     Debug.Assert(statusBlock.Information.ToInt64() != 0);
                     return true;
                 default:
-                    throw Win32Marshal.GetExceptionForWin32Error((int)Interop.NtDll.RtlNtStatusToDosError(status), _currentPath);
+                    int error = (int)Interop.NtDll.RtlNtStatusToDosError(status);
+
+                    // Note that there are many NT status codes that convert to ERROR_ACCESS_DENIED.
+                    if (error == Interop.Errors.ERROR_ACCESS_DENIED && (_options & FindOptions.IgnoreInaccessable) != 0)
+                    {
+                        // User wanted to skip on access denied.
+                        DirectoryFinished();
+                        return false;
+                    }
+                    throw Win32Marshal.GetExceptionForWin32Error(error, _currentPath);
             }
         }
     }
