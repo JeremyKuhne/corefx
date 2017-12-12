@@ -145,7 +145,12 @@ namespace System.IO
             _pinnedBuffer = GCHandle.Alloc(_buffer, GCHandleType.Pinned);
             if ((_options & FindOptions.Recurse) != 0)
                 _pending = new Queue<(IntPtr, string)>();
-            _directoryHandle = CreateDirectoryHandle(_originalFullPath);
+
+            // We'll only suppress the media insertion prompt on the topmost directory
+            using (new DisableMediaInsertionPrompt())
+            {
+                _directoryHandle = CreateDirectoryHandle(_originalFullPath);
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -159,8 +164,9 @@ namespace System.IO
             if (_lastEntryFound)
                 return false;
 
+            bool acquiredLock = false;
             if ((_options & FindOptions.AvoidLocking) == 0)
-                Monitor.Enter(_lock);
+                Monitor.Enter(_lock, ref acquiredLock);
 
             try
             {
@@ -206,7 +212,7 @@ namespace System.IO
             }
             finally
             {
-                if ((_options & FindOptions.AvoidLocking) == 0)
+                if (acquiredLock)
                     Monitor.Exit(_lock);
             }
         }
@@ -259,8 +265,9 @@ namespace System.IO
             // It is possible to fail to allocate the lock, but the finalizer will still run
             if (_lock != null)
             {
+                bool acquiredLock = false;
                 if ((_options & FindOptions.AvoidLocking) == 0)
-                    Monitor.Enter(_lock);
+                    Monitor.Enter(_lock, ref acquiredLock);
 
                 try
                 {
@@ -287,7 +294,7 @@ namespace System.IO
                 }
                 finally
                 {
-                    if ((_options & FindOptions.AvoidLocking) == 0)
+                    if (acquiredLock)
                         Monitor.Exit(_lock);
                 }
             }
