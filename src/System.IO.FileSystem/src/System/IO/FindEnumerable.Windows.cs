@@ -15,6 +15,8 @@ namespace System.IO
 {
     public unsafe partial class FindEnumerable<TResult, TState> : CriticalFinalizerObject, IEnumerable<TResult>, IEnumerator<TResult>
     {
+        private const int StandardBufferSize = 4096;
+
         private readonly string _originalFullPath;
         private readonly string _originalUserPath;
         private readonly FindOptions _options;
@@ -134,7 +136,12 @@ namespace System.IO
         private void Initialize()
         {
             _currentPath = _originalFullPath;
-            _buffer = ArrayPool<byte>.Shared.Rent(4096);
+
+            int bufferSize = StandardBufferSize;
+            if ((_options & FindOptions.UseLargeBuffer) != 0)
+                bufferSize *= 4;
+
+            _buffer = ArrayPool<byte>.Shared.Rent(bufferSize);
             _pinnedBuffer = GCHandle.Alloc(_buffer, GCHandleType.Pinned);
             if ((_options & FindOptions.Recurse) != 0)
                 _pending = new Queue<(IntPtr, string)>();
@@ -152,7 +159,10 @@ namespace System.IO
             if (_lastEntryFound)
                 return false;
 
-            lock (_lock)
+            if ((_options & FindOptions.AvoidLocking) == 0)
+                Monitor.Enter(_lock);
+
+            try
             {
                 if (_lastEntryFound)
                     return false;
@@ -193,6 +203,11 @@ namespace System.IO
                     _current = _transform(ref findData);
 
                 return !_lastEntryFound;
+            }
+            finally
+            {
+                if ((_options & FindOptions.AvoidLocking) == 0)
+                    Monitor.Exit(_lock);
             }
         }
 
@@ -244,7 +259,10 @@ namespace System.IO
             // It is possible to fail to allocate the lock, but the finalizer will still run
             if (_lock != null)
             {
-                lock (_lock)
+                if ((_options & FindOptions.AvoidLocking) == 0)
+                    Monitor.Enter(_lock);
+
+                try
                 {
                     _lastEntryFound = true;
 
@@ -266,6 +284,11 @@ namespace System.IO
                         ArrayPool<byte>.Shared.Return(_buffer);
 
                     _buffer = null;
+                }
+                finally
+                {
+                    if ((_options & FindOptions.AvoidLocking) == 0)
+                        Monitor.Exit(_lock);
                 }
             }
         }

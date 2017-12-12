@@ -33,6 +33,6 @@ namespace System.IO
         /// avoid access violations with native access should someone actually try to use the
         /// the same enumerator on multiple threads.
         /// </remarks>
-        AvoidLocking = 0x0000_0008,
+        AvoidLocking = 0x0000_0008
     }
 }
