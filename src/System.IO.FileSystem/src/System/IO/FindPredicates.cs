@@ -4,11 +4,11 @@
 
 namespace System.IO
 {
-    internal static partial class FindPredicates
+    public static class FindPredicates
     {
-        internal static bool NotDotOrDotDot<TState>(ref FindData<TState> findData) => !PathHelpers.IsDotOrDotDot(findData.FileName);
+        public static bool NotDotOrDotDot<TState>(ref FindData<TState> findData) => !PathHelpers.IsDotOrDotDot(findData.FileName);
 
-        internal static bool IsDirectory<TState>(ref FindData<TState> findData)
+        public static bool IsDirectory<TState>(ref FindData<TState> findData)
         {
             FileAttributes attributes = findData.Attributes;
             return attributes != (FileAttributes)(-1)

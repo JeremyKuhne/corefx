@@ -7,7 +7,7 @@ using System.Text;
 
 namespace System.IO
 {
-    internal static class DosMatcher
+    public static class DosMatcher
     {
         // [MS - FSA] 2.1.4.4 Algorithm for Determining if a FileName Is in an Expression
         // https://msdn.microsoft.com/en-us/library/ff469270.aspx
@@ -20,7 +20,7 @@ namespace System.IO
         /// Change '*' and '?' to '&lt;', '&gt;' and '"' to match Win32 behavior. For compatibility, Windows
         /// changes some wildcards to provide a closer match to historical DOS 8.3 filename matching.
         /// </summary>
-        internal static string TranslateExpression(string expression)
+        public static string TranslateExpression(string expression)
         {
             if (string.IsNullOrEmpty(expression) || expression == "*" || expression == "*.*")
                 return "*";
@@ -76,7 +76,7 @@ namespace System.IO
         /// Like PatternMatcher, matching will not line up with Win32 behavior unless you transform the expression
         /// using <see cref="TranslateExpression(string)"/>
         /// </remarks>
-        internal static bool MatchPattern(string expression, ReadOnlySpan<char> name, bool ignoreCase = true)
+        public static bool MatchPattern(string expression, ReadOnlySpan<char> name, bool ignoreCase = true)
         {
             // The idea behind the algorithm is pretty simple. We keep track of all possible locations
             // in the regular expression that are matching the name. When the name has been exhausted,

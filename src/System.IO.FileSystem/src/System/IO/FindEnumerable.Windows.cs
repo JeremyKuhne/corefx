@@ -233,7 +233,7 @@ namespace System.IO
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void DirectoryFinished()
+        private void DirectoryFinished()
         {
             _info = null;
             if (_pending == null || _pending.Count == 0)

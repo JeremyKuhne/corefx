@@ -235,4 +235,33 @@ namespace System.IO
         public DateTime LastAccessTimeUtc { get { throw null; } }
         public DateTime LastWriteTimeUtc { get { throw null; } }
     }
+    public partial class FindEnumerable<TResult, TState> : Runtime.ConstrainedExecution.CriticalFinalizerObject, Collections.Generic.IEnumerable<TResult>, Collections.Generic.IEnumerator<TResult>
+    {
+        public FindEnumerable(string directory, FindTransform<TResult, TState> transform, FindPredicate<TState> predicate,
+            FindPredicate<TState> recursePredicate = null, TState state = default, FindOptions options = FindOptions.None) { }
+        public Collections.Generic.IEnumerator<TResult> GetEnumerator() { throw null; }
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
+        public TResult Current { get { throw null;  } }
+        object System.Collections.IEnumerator.Current { get { throw null; } }
+        public bool MoveNext() { throw null; }
+        public void Reset() { throw null; }
+        public void Dispose() { throw null; }
+    }
+    public static class DosMatcher
+    {
+        public static string TranslateExpression(string expression) { throw null; }
+        public static bool MatchPattern(string expression, ReadOnlySpan<char> name, bool ignoreCase = true) { throw null; }
+    }
+    public static class FindPredicates
+    {
+        public static bool NotDotOrDotDot<TState>(ref FindData<TState> findData) { throw null; }
+        public static bool IsDirectory<TState>(ref FindData<TState> findData) { throw null; }
+    }
+    public static class FindTransforms
+    {
+        public static DirectoryInfo AsDirectoryInfo<TState>(ref FindData<TState> findData) { throw null; }
+        public static FileInfo AsFileInfo<TState>(ref FindData<TState> findData) { throw null; }
+        public static FileSystemInfo AsFileSystemInfo<TState>(ref FindData<TState> findData) { throw null; }
+        public static string AsUserFullPath<TState>(ref FindData<TState> findData) { throw null; }
+    }
 }
