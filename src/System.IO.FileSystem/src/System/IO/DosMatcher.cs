@@ -16,6 +16,11 @@ namespace System.IO
             '\"', '<', '>', '*', '?'
         };
 
+        private static readonly char[] s_simpleWildcardChars =
+        {
+            '*', '?'
+        };
+
         /// <summary>
         /// Change '*' and '?' to '&lt;', '&gt;' and '"' to match Win32 behavior. For compatibility, Windows
         /// changes some wildcards to provide a closer match to historical DOS 8.3 filename matching.
@@ -64,7 +69,8 @@ namespace System.IO
         }
 
         /// <summary>
-        /// Return true if the given expression matches the given name.
+        /// Return true if the given expression matches the given name. Supports the following wildcards:
+        /// '*', '?', '&lt;', '&gt;', '"'. The backslash character '\' escapes.
         /// </summary>
         /// <param name="expression">The expression to match with, such as "*.foo".</param>
         /// <param name="name">The name to check against the expression.</param>
@@ -77,6 +83,11 @@ namespace System.IO
         /// using <see cref="TranslateExpression(string)"/>
         /// </remarks>
         public static bool MatchPattern(string expression, ReadOnlySpan<char> name, bool ignoreCase = true)
+        {
+            return MatchPattern(expression, name, ignoreCase, useExtendedWildcards: true);
+        }
+
+        internal static bool MatchPattern(string expression, ReadOnlySpan<char> name, bool ignoreCase, bool useExtendedWildcards)
         {
             // The idea behind the algorithm is pretty simple. We keep track of all possible locations
             // in the regular expression that are matching the name. When the name has been exhausted,
@@ -92,7 +103,7 @@ namespace System.IO
                 if (expression.Length == 1)
                     return true;
 
-                if (expression.IndexOfAny(s_wildcardChars, startIndex: 1) == -1)
+                if (expression.IndexOfAny(useExtendedWildcards ? s_wildcardChars : s_simpleWildcardChars, startIndex: 1) == -1)
                 {
                     // Handle the special case of a single starting *, which essentially means "ends with"
 
@@ -177,7 +188,7 @@ namespace System.IO
                             // '*' matches any character zero or more times.
                             goto MatchZeroOrMore;
                         }
-                        else if (expressionChar == '<')
+                        else if (useExtendedWildcards && expressionChar == '<')
                         {
                             // '<' (DOS_STAR) matches any character except '.' zero or more times.
 
@@ -210,11 +221,11 @@ namespace System.IO
                         }
                         else
                         {
-                            // The following expression characters all match by consuming
-                            // a character, thus force the expression, and thus state forward.
+                            // The remaining expression characters all match by consuming a character,
+                            // so we need to force the expression and state forward.
                             currentState += 2;
 
-                            if (expressionChar == '>')
+                            if (useExtendedWildcards && expressionChar == '>')
                             {
                                 // '>' (DOS_QM) is the most complicated. If the name is finished,
                                 // we can match zero characters. If this name is a '.', we
@@ -226,7 +237,7 @@ namespace System.IO
                                 currentMatches[currentMatch++] = currentState;
                                 goto ExpressionFinished;
                             }
-                            else if (expressionChar == '"')
+                            else if (useExtendedWildcards && expressionChar == '"')
                             {
                                 // A '"' (DOS_DOT) can match either a period, or zero characters
                                 // beyond the end of name.
@@ -242,6 +253,19 @@ namespace System.IO
                             }
                             else
                             {
+                                if (expressionChar == '\\')
+                                {
+                                    // Escape character, try to move the expression forward again and match literally.
+                                    if (++expressionOffset == expression.Length)
+                                    {
+                                        currentMatches[currentMatch++] = maxState;
+                                        goto ExpressionFinished;
+                                    }
+
+                                    currentState = expressionOffset * 2 + 2;
+                                    expressionChar = expression[expressionOffset];
+                                }
+
                                 // From this point on a name character is required to even
                                 // continue, let alone make a match.
                                 if (nameFinished) goto ExpressionFinished;
@@ -259,7 +283,6 @@ namespace System.IO
                                     currentMatches[currentMatch++] = currentState;
                                 }
 
-                                // The expression didn't match so move to the next prior match.
                                 goto ExpressionFinished;
                             }
                         }

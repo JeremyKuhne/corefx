@@ -252,6 +252,10 @@ namespace System.IO
         public static string TranslateExpression(string expression) { throw null; }
         public static bool MatchPattern(string expression, ReadOnlySpan<char> name, bool ignoreCase = true) { throw null; }
     }
+    public static class SimpleMatcher
+    {
+        public static bool MatchPattern(string expression, ReadOnlySpan<char> name, bool ignoreCase = true) { throw null; }
+    }
     public static class FindPredicates
     {
         public static bool NotDotOrDotDot<TState>(ref FindData<TState> findData) { throw null; }

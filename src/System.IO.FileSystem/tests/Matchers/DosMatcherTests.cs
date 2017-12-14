@@ -2,19 +2,45 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Reflection;
-using System.Threading;
 using Xunit;
 
 namespace System.IO.Tests
 {
     public class DosMatcherTests
     {
-        [Theory, MemberData(nameof(DosMatchData))]
+        [Theory, MemberData(nameof(DosMatchData)), MemberData(nameof(EscapedDosMatchData))]
         public static void DosMatch(string expression, string name, bool ignoreCase, bool expected)
         {
             Assert.Equal(expected, DosMatcher.MatchPattern(expression, name.AsReadOnlySpan(), ignoreCase));
         }
+
+        public static TheoryData<string, string, bool, bool> EscapedDosMatchData => new TheoryData<string, string, bool, bool>
+        {
+            // Trailing escape matches as it is considered "invisible"
+            { "\\", "\\", false, true },
+            { "\\", "\\", true, true },
+            { "\\\\", "\\", false, true },
+            { "\\\\", "\\", true, true },
+
+
+            { "\\*", "a", false, false },
+            { "\\*", "a", true, false },
+            { "\\*", "*", false, true },
+            { "\\*", "*", true, true },
+            { "*\\*", "***", false, true },
+            { "*\\*", "***", true, true },
+            { "*\\*", "ABC*", false, true },
+            { "*\\*", "ABC*", true, true },
+            { "*\\*", "***A", false, false },
+            { "*\\*", "***A", true, false },
+            { "*\\*", "ABC*A", false, false },
+            { "*\\*", "ABC*A", true, false },
+
+            { "\\\"", "a", false, false },
+            { "\\\"", "a", true, false },
+            { "\\\"", "\"", false, true },
+            { "\\\"", "\"", true, true },
+        };
 
         public static TheoryData<string, string, bool, bool> DosMatchData => new TheoryData<string, string, bool, bool>
         {

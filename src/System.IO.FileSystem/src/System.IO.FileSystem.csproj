@@ -19,6 +19,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System\IO\CharSpanExtensions.cs" />
+    <Compile Include="System\IO\SimpleMatcher.cs" />
     <Compile Include="System\IO\DosMatcher.cs" />
     <Compile Include="System\IO\Error.cs" />
     <Compile Include="System\IO\Directory.cs" />

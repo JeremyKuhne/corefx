@@ -112,7 +112,7 @@
     <Compile Include="File\ReadWriteAllText.cs" />
     <Compile Include="File\ReadWriteAllLines.cs" />
     <Compile Include="FindEnumerable\Construction.cs" />
-    <Compile Include="Matchers\DosMatcher.cs" />
+    <Compile Include="Matchers\DosMatcherTests.cs" />
     <Compile Include="TestData.cs" />
     <Compile Include="UnseekableFileStream.cs" />
     <Compile Include="FSAssert.cs" />
