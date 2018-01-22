@@ -34,7 +34,7 @@ namespace System.IO
 
         internal static FindEnumerable<string, string> UserFiles(string directory,
             string expression = "*",
-            bool recursive = false)
+            FindOptions options = FindOptions.None)
         {
             return new FindEnumerable<string, string>(
                 directory,
@@ -46,12 +46,12 @@ namespace System.IO
                         && DosMatcher.MatchPattern(findData.State, findData.FileName, ignoreCase: true);
                 },
                 state: DosMatcher.TranslateExpression(expression),
-                options: recursive ? FindOptions.Recurse : FindOptions.None);
+                options: options);
         }
 
         internal static FindEnumerable<string, string> UserDirectories(string directory,
             string expression = "*",
-            bool recursive = false)
+            FindOptions options = FindOptions.None)
         {
             return new FindEnumerable<string, string>(
                 directory,
@@ -63,12 +63,12 @@ namespace System.IO
                         && DosMatcher.MatchPattern(findData.State, findData.FileName, ignoreCase: true);
                 },
                 state: DosMatcher.TranslateExpression(expression),
-                options: recursive ? FindOptions.Recurse : FindOptions.None);
+                options: options);
         }
 
         internal static FindEnumerable<string, string> UserEntries(string directory,
             string expression = "*",
-            bool recursive = false)
+            FindOptions options = FindOptions.None)
         {
             return new FindEnumerable<string, string>(
                 directory,
@@ -79,13 +79,13 @@ namespace System.IO
                         && DosMatcher.MatchPattern(findData.State, findData.FileName, ignoreCase: true);
                 },
                 state: DosMatcher.TranslateExpression(expression),
-                options: recursive ? FindOptions.Recurse : FindOptions.None);
+                options: options);
         }
 
         internal static FindEnumerable<FileInfo, string> FileInfos(
             string directory,
             string expression = "*",
-            bool recursive = false)
+            FindOptions options = FindOptions.None)
         {
              return new FindEnumerable<FileInfo, string>(
                 directory,
@@ -97,13 +97,13 @@ namespace System.IO
                         && DosMatcher.MatchPattern(findData.State, findData.FileName, ignoreCase: true);
                 },
                 state: DosMatcher.TranslateExpression(expression),
-                options: recursive ? FindOptions.Recurse : FindOptions.None);
+                options: options);
         }
 
         internal static FindEnumerable<DirectoryInfo, string> DirectoryInfos(
             string directory,
             string expression = "*",
-            bool recursive = false)
+            FindOptions options = FindOptions.None)
         {
             return new FindEnumerable<DirectoryInfo, string>(
                directory,
@@ -115,13 +115,13 @@ namespace System.IO
                        && DosMatcher.MatchPattern(findData.State, findData.FileName, ignoreCase: true);
                },
                state: DosMatcher.TranslateExpression(expression),
-               options: recursive ? FindOptions.Recurse : FindOptions.None);
+               options: options);
         }
 
         internal static FindEnumerable<FileSystemInfo, string> FileSystemInfos(
             string directory,
             string expression = "*",
-            bool recursive = false)
+            FindOptions options = FindOptions.None)
         {
             return new FindEnumerable<FileSystemInfo, string>(
                directory,
@@ -132,7 +132,7 @@ namespace System.IO
                        && DosMatcher.MatchPattern(findData.State, findData.FileName, ignoreCase: true);
                },
                state: DosMatcher.TranslateExpression(expression),
-               options: recursive ? FindOptions.Recurse : FindOptions.None);
+               options: options);
         }
     }
 }

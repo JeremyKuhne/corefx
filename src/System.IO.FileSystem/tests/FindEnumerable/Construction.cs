@@ -23,42 +23,5 @@ namespace System.IO.Tests.FileEnumerable
             AssertExtensions.Throws<ArgumentNullException>("predicate",
                 () => new FindEnumerable<string, string>(TestDirectory, transform: FindTransforms.AsUserFullPath, predicate: null));
         }
-
-        [Fact]
-        public void DoesNotLockWithFlag()
-        {
-            string directory = Directory.CreateDirectory(GetTestFilePath()).FullName;
-
-            object lockField = null;
-            var enumerable = new FindEnumerable<string, string>(
-                directory,
-                FindTransforms.AsUserFullPath,
-                (ref FindData<string> findData) =>
-                {
-                    Assert.NotNull(lockField);
-                    Assert.False(Monitor.IsEntered(lockField));
-                    return false;
-                },
-                options: FindOptions.AvoidLocking);
-            lockField = enumerable.GetType().GetField("_lock", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(enumerable);
-        }
-
-        [Fact]
-        public void LocksWithoutFlag()
-        {
-            string directory = Directory.CreateDirectory(GetTestFilePath()).FullName;
-
-            object lockField = null;
-            var enumerable = new FindEnumerable<string, string>(
-                directory,
-                FindTransforms.AsUserFullPath,
-                (ref FindData<string> findData) =>
-                {
-                    Assert.NotNull(lockField);
-                    Assert.True(Monitor.IsEntered(lockField));
-                    return false;
-                });
-            lockField = enumerable.GetType().GetField("_lock", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(enumerable);
-        }
     }
 }
