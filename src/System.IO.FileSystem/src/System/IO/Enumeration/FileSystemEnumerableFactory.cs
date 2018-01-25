@@ -43,11 +43,11 @@ namespace System.IO.Enumeration
                 {
                     return !findData.IsNameDotOrDotDot
                         && !findData.IsDirectory
-                        && NameMatching.MatchDosPattern(state, findData.FileName, ignoreCase: true);
-                })
+                        && FileSystemName.MatchDosPattern(state, findData.FileName, ignoreCase: true);
+                },
+                options)
             {
-                State = NameMatching.TranslateDosExpression(expression),
-                Options = options
+                State = FileSystemName.TranslateDosExpression(expression),
             };
         }
 
@@ -62,11 +62,11 @@ namespace System.IO.Enumeration
                 {
                     return !findData.IsNameDotOrDotDot
                         && findData.IsDirectory
-                        && NameMatching.MatchDosPattern(state, findData.FileName, ignoreCase: true);
-                })
+                        && FileSystemName.MatchDosPattern(state, findData.FileName, ignoreCase: true);
+                },
+                options)
             {
-                State = NameMatching.TranslateDosExpression(expression),
-                Options = options
+                State = FileSystemName.TranslateDosExpression(expression),
             };
         }
 
@@ -80,11 +80,11 @@ namespace System.IO.Enumeration
                 (ref FileSystemEntry findData, string state) =>
                 {
                     return !findData.IsNameDotOrDotDot
-                        && NameMatching.MatchDosPattern(state, findData.FileName, ignoreCase: true);
-                })
+                        && FileSystemName.MatchDosPattern(state, findData.FileName, ignoreCase: true);
+                },
+                options)
             {
-                State = NameMatching.TranslateDosExpression(expression),
-                Options = options
+                State = FileSystemName.TranslateDosExpression(expression),
             };
         }
 
@@ -100,11 +100,11 @@ namespace System.IO.Enumeration
                 {
                     return !findData.IsNameDotOrDotDot
                         && !findData.IsDirectory
-                        && NameMatching.MatchDosPattern(state, findData.FileName, ignoreCase: true);
-                })
+                        && FileSystemName.MatchDosPattern(state, findData.FileName, ignoreCase: true);
+                },
+                options)
              {
-                 State = NameMatching.TranslateDosExpression(expression),
-                 Options = options
+                 State = FileSystemName.TranslateDosExpression(expression),
              };
         }
 
@@ -120,11 +120,11 @@ namespace System.IO.Enumeration
                {
                    return !findData.IsNameDotOrDotDot
                        && findData.IsDirectory
-                       && NameMatching.MatchDosPattern(state, findData.FileName, ignoreCase: true);
-               })
+                       && FileSystemName.MatchDosPattern(state, findData.FileName, ignoreCase: true);
+               },
+               options)
             {
-                State = NameMatching.TranslateDosExpression(expression),
-                Options = options
+                State = FileSystemName.TranslateDosExpression(expression),
             };
         }
 
@@ -139,11 +139,11 @@ namespace System.IO.Enumeration
                (ref FileSystemEntry findData, string state) =>
                {
                    return !findData.IsNameDotOrDotDot
-                       && NameMatching.MatchDosPattern(state, findData.FileName, ignoreCase: true);
-               })
+                       && FileSystemName.MatchDosPattern(state, findData.FileName, ignoreCase: true);
+               },
+               options)
             {
-                State = NameMatching.TranslateDosExpression(expression),
-                Options = options
+                State = FileSystemName.TranslateDosExpression(expression),
             };
         }
     }

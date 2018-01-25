@@ -20,7 +20,7 @@
   <ItemGroup>
     <Compile Include="System\IO\CharSpanExtensions.cs" />
     <Compile Include="System\IO\Enumeration\FileSystemEnumerable.cs" />
-    <Compile Include="System\IO\Enumeration\NameMatching.cs" />
+    <Compile Include="System\IO\Enumeration\FileSystemName.cs" />
     <Compile Include="System\IO\Error.cs" />
     <Compile Include="System\IO\Directory.cs" />
     <Compile Include="System\IO\DirectoryInfo.cs" />
@@ -68,7 +68,7 @@
     <Compile Include="System\IO\DisableMediaInsertionPrompt.cs" />
     <Compile Include="System\IO\DirectoryInfo.Windows.cs" />
     <Compile Include="System\IO\FileInfo.Windows.cs" />
-    <Compile Include="System\IO\Enumeration\FileSystemEnumerableBase.Windows.cs" />
+    <Compile Include="System\IO\Enumeration\FileSystemEnumerator.Windows.cs" />
     <Compile Include="System\IO\Enumeration\FileSystemEnumerableFactory.cs" />
     <Compile Include="System\IO\FileSystemInfo.Windows.cs" />
     <Compile Include="System\IO\PathHelpers.Windows.cs" />
@@ -244,7 +244,7 @@
   </ItemGroup>
   <!-- Windows : Win32 only -->
   <ItemGroup Condition="'$(TargetsWindows)' == 'true' and '$(UWPCompatible)' != 'true'">
-    <Compile Include="System\IO\Enumeration\FileSystemEnumerableBase.Win32.cs" />
+    <Compile Include="System\IO\Enumeration\FileSystemEnumerator.Win32.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CreateFile.cs">
       <Link>Common\Interop\Windows\Interop.CreateFile.cs</Link>
     </Compile>
@@ -272,7 +272,7 @@
   </ItemGroup>
   <!-- Windows : UAP - Win32 + WinRT -->
   <ItemGroup Condition="'$(TargetsWindows)' == 'true' and '$(UWPCompatible)' == 'true'">
-    <Compile Include="System\IO\Enumeration\FileSystemEnumerableBase.WinRT.cs" />
+    <Compile Include="System\IO\Enumeration\FileSystemEnumerator.WinRT.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CreateFile2.cs">
       <Link>Common\Interop\Windows\Interop.CreateFile2.cs</Link>
     </Compile>

@@ -5,7 +5,6 @@
 using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
@@ -13,7 +12,7 @@ using System.Threading;
 
 namespace System.IO.Enumeration
 {
-    public unsafe abstract partial class FileSystemEnumerableBase<TResult> : CriticalFinalizerObject, IEnumerable<TResult>, IEnumerator<TResult>
+    public unsafe partial class FileSystemEnumerator<TResult> : CriticalFinalizerObject, IEnumerator<TResult>
     {
         private const int StandardBufferSize = 4096;
 
@@ -22,10 +21,10 @@ namespace System.IO.Enumeration
         private const int MinimumBufferSize = 1024;
 
         private readonly string _originalFullPath;
+        private readonly EnumerationOptions _options;
         protected readonly string OriginalPath;
 
         private object _lock = new object();
-        private int _enumeratorCreated;
 
         private Interop.NtDll.FILE_FULL_DIR_INFORMATION* _info;
         private TResult _current;
@@ -41,10 +40,21 @@ namespace System.IO.Enumeration
         /// Encapsulates a find operation.
         /// </summary>
         /// <param name="directory">The directory to search in.</param>
-        public FileSystemEnumerableBase(string directory)
+        public FileSystemEnumerator(string directory)
+            : this(directory, EnumerationOptions.Default)
+        {
+        }
+
+        /// <summary>
+        /// Encapsulates a find operation.
+        /// </summary>
+        /// <param name="directory">The directory to search in.</param>
+        /// <param name="options">Enumeration options to use.</param>
+        public FileSystemEnumerator(string directory, EnumerationOptions options)
         {
             OriginalPath = directory ?? throw new ArgumentNullException(nameof(directory));
             _originalFullPath = Path.GetFullPath(directory);
+            _options = options;
 
             // We'll only suppress the media insertion prompt on the topmost directory
             using (new DisableMediaInsertionPrompt())
@@ -53,9 +63,34 @@ namespace System.IO.Enumeration
                 // we immediately throw IO exceptions for missing directory/etc.
                 _directoryHandle = CreateDirectoryHandle(_originalFullPath);
             }
+
+            _currentPath = _originalFullPath;
+
+            int requestedBufferSize = _options.MinimumBufferSize;
+            int bufferSize = requestedBufferSize <= 0 ? StandardBufferSize
+                : Math.Max(MinimumBufferSize, requestedBufferSize);
+
+            try
+            {
+                _buffer = ArrayPool<byte>.Shared.Rent(bufferSize);
+                _pinnedBuffer = GCHandle.Alloc(_buffer, GCHandleType.Pinned);
+            }
+            catch
+            {
+                // Close the directory handle right away if we fail to allocate
+                CloseDirectoryHandle();
+                throw;
+            }
         }
 
-        public EnumerationOptions Options { get; set; }
+        private void CloseDirectoryHandle()
+        {
+            // As handles can be reused we want to be extra careful to close handles only once
+            IntPtr handle = Interlocked.Exchange(ref _directoryHandle, IntPtr.Zero);
+            if (handle != IntPtr.Zero)
+                Interop.Kernel32.CloseHandle(handle);
+        }
+
 
         protected virtual bool ShouldIncludeEntry(ref FileSystemEntry entry) => true;
         protected virtual bool ShouldRecurseIntoEntry(ref FileSystemEntry entry) => true;
@@ -81,7 +116,7 @@ namespace System.IO.Enumeration
                 switch (error)
                 {
                     case Interop.Errors.ERROR_ACCESS_DENIED:
-                        if (Options.IgnoreInaccessible)
+                        if (_options.IgnoreInaccessible)
                         {
                             return IntPtr.Zero;
                         }
@@ -96,35 +131,6 @@ namespace System.IO.Enumeration
 
             return handle;
         }
-
-        public IEnumerator<TResult> GetEnumerator()
-        {
-            if (_directoryHandle == IntPtr.Zero)
-            {
-                // We didn't have rights to access the root directory and the flag was set appropriately
-                return Enumerable.Empty<TResult>().GetEnumerator();
-            }
-
-            FileSystemEnumerableBase<TResult> enumerator = Interlocked.Exchange(ref _enumeratorCreated, 1) == 0 ? this : Clone();
-            enumerator.Initialize();
-            return enumerator;
-        }
-
-        protected abstract FileSystemEnumerableBase<TResult> Clone();
-
-        private void Initialize()
-        {
-            _currentPath = _originalFullPath;
-
-            int requestedBufferSize = Options.MinimumBufferSize;
-            int bufferSize = requestedBufferSize <= 0 ? StandardBufferSize
-                : Math.Max(MinimumBufferSize, requestedBufferSize);
-
-            _buffer = ArrayPool<byte>.Shared.Rent(bufferSize);
-            _pinnedBuffer = GCHandle.Alloc(_buffer, GCHandleType.Pinned);
-        }
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public TResult Current => _current;
 
@@ -150,9 +156,9 @@ namespace System.IO.Enumeration
                     if (!_lastEntryFound && _info != null)
                     {
                         // If needed, stash any subdirectories to process later
-                        if (Options.Recurse && (_info->FileAttributes & FileAttributes.Directory) != 0
+                        if (_options.Recurse && (_info->FileAttributes & FileAttributes.Directory) != 0
                             && !PathHelpers.IsDotOrDotDot(_info->FileName)
-                            && (_info->FileAttributes & Options.AttributesToSkip) == 0
+                            && (_info->FileAttributes & _options.AttributesToSkip) == 0
                             && ShouldRecurseIntoEntry(ref findData))
                         {
                             string subDirectory = PathHelpers.CombineNoChecks(_currentPath, _info->FileName);
@@ -175,7 +181,7 @@ namespace System.IO.Enumeration
 
                         findData = new FileSystemEntry(_info, _currentPath, _originalFullPath, OriginalPath);
                     }
-                } while (!_lastEntryFound && ((_info->FileAttributes & Options.AttributesToSkip) != 0 || !ShouldIncludeEntry(ref findData)));
+                } while (!_lastEntryFound && ((_info->FileAttributes & _options.AttributesToSkip) != 0 || !ShouldIncludeEntry(ref findData)));
 
                 if (!_lastEntryFound)
                     _current = TransformEntry(ref findData);
@@ -210,8 +216,7 @@ namespace System.IO.Enumeration
             _info = null;
 
             // Close the handle now that we're done
-            Interop.Kernel32.CloseHandle(_directoryHandle);
-            _directoryHandle = IntPtr.Zero;
+            CloseDirectoryHandle();
             OnDirectoryFinished(_currentPath);
 
             if (_pending == null || _pending.Count == 0)
@@ -249,11 +254,9 @@ namespace System.IO.Enumeration
                 {
                     _lastEntryFound = true;
 
-                    // Don't ever close a valid handle twice as they can be reused- set to zero to ensure this
-                    Interop.Kernel32.CloseHandle(_directoryHandle);
-                    _directoryHandle = IntPtr.Zero;
+                    CloseDirectoryHandle();
 
-                    if (Options.Recurse && _pending != null)
+                    if (_options.Recurse && _pending != null)
                     {
                         while (_pending.Count > 0)
                             Interop.Kernel32.CloseHandle(_pending.Dequeue().Handle);
@@ -276,7 +279,7 @@ namespace System.IO.Enumeration
             }
         }
 
-        ~FileSystemEnumerableBase()
+        ~FileSystemEnumerator()
         {
             Dispose(disposing: false);
         }

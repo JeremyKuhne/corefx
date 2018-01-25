@@ -255,37 +255,37 @@ namespace System.IO.Enumeration
         public FileSystemInfo ToFileSystemInfo() { throw null; }
         public string ToUserFullPath() { throw null; }
     }
-    public abstract class FileSystemEnumerableBase<TResult> : Runtime.ConstrainedExecution.CriticalFinalizerObject, Collections.Generic.IEnumerable<TResult>, Collections.Generic.IEnumerator<TResult>
+    public class FileSystemEnumerator<TResult> : Runtime.ConstrainedExecution.CriticalFinalizerObject, Collections.Generic.IEnumerator<TResult>
     {
-        protected FileSystemEnumerableBase(string directory) { }
-        public System.IO.Enumeration.EnumerationOptions Options { get { throw null; } set { } }
+        public FileSystemEnumerator(string directory) { }
+        public FileSystemEnumerator(string directory, EnumerationOptions options) { }
 
         protected virtual bool ShouldIncludeEntry(ref FileSystemEntry entry) { throw null; }
         protected virtual bool ShouldRecurseIntoEntry(ref FileSystemEntry entry) { throw null; }
         protected virtual TResult TransformEntry(ref FileSystemEntry entry) { throw null; }
         protected virtual void OnDirectoryFinished(ReadOnlySpan<char> directory) { throw null; }
 
-        protected abstract FileSystemEnumerableBase<TResult> Clone();
-
-        public Collections.Generic.IEnumerator<TResult> GetEnumerator() { throw null; }
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
         public TResult Current { get { throw null; } }
         object System.Collections.IEnumerator.Current { get { throw null; } }
         public bool MoveNext() { throw null; }
         public void Reset() { throw null; }
         public void Dispose() { throw null; }
     }
-    public class FileSystemEnumerable<TResult, TState> : FileSystemEnumerableBase<TResult>
+    public class FileSystemEnumerable<TResult, TState> : Collections.Generic.IEnumerable<TResult>
     {
-        public FileSystemEnumerable(string directory, FindTransform transform, FindPredicate predicate): base(directory) { }
-        public FindPredicate RecursePredicate { get { throw null; } set { } }
-        protected override FileSystemEnumerableBase<TResult> Clone() { throw null; }
+        public FileSystemEnumerable(string directory, FindTransform transform, FindPredicate shouldIncludePredicate = null) { }
+        public FileSystemEnumerable(string directory, FindTransform transform, FindPredicate shouldIncludePredicate, EnumerationOptions options) { }
+
+        public FindPredicate ShouldRecursePredicate { get { throw null; } set { } }
         public TState State { get { throw null; } set { } }
+
+        public Collections.Generic.IEnumerator<TResult> GetEnumerator() { throw null; }
+        Collections.IEnumerator Collections.IEnumerable.GetEnumerator() { throw null; }
 
         public delegate bool FindPredicate(ref System.IO.Enumeration.FileSystemEntry entry, TState state);
         public delegate TResult FindTransform(ref System.IO.Enumeration.FileSystemEntry entry, TState state);
     }
-    public static class NameMatching
+    public static class FileSystemName
     {
         public static string TranslateDosExpression(string expression) { throw null; }
         public static bool MatchDosPattern(string expression, ReadOnlySpan<char> name, bool ignoreCase = true) { throw null; }

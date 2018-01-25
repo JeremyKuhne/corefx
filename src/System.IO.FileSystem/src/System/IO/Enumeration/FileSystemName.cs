@@ -10,7 +10,7 @@ namespace System.IO.Enumeration
     /// <summary>
     /// Provides methods for matching file system names.
     /// </summary>
-    public static class NameMatching
+    public static class FileSystemName
     {
         // [MS - FSA] 2.1.4.4 Algorithm for Determining if a FileName Is in an Expression
         // https://msdn.microsoft.com/en-us/library/ff469270.aspx
