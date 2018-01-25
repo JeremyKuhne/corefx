@@ -7,7 +7,7 @@ using System.Text;
 
 namespace System.IO
 {
-    public static class DosMatcher
+    public static class NameMatchers
     {
         // [MS - FSA] 2.1.4.4 Algorithm for Determining if a FileName Is in an Expression
         // https://msdn.microsoft.com/en-us/library/ff469270.aspx
@@ -25,7 +25,7 @@ namespace System.IO
         /// Change '*' and '?' to '&lt;', '&gt;' and '"' to match Win32 behavior. For compatibility, Windows
         /// changes some wildcards to provide a closer match to historical DOS 8.3 filename matching.
         /// </summary>
-        public static string TranslateExpression(string expression)
+        public static string TranslateDosExpression(string expression)
         {
             if (string.IsNullOrEmpty(expression) || expression == "*" || expression == "*.*")
                 return "*";
@@ -80,14 +80,22 @@ namespace System.IO
         /// of RtlIsNameInExpression, which defines the rules for matching DOS wildcards ('*', '?', '&lt;', '&gt;', '"').
         /// 
         /// Like PatternMatcher, matching will not line up with Win32 behavior unless you transform the expression
-        /// using <see cref="TranslateExpression(string)"/>
+        /// using <see cref="TranslateDosExpression(string)"/>
         /// </remarks>
-        public static bool MatchPattern(string expression, ReadOnlySpan<char> name, bool ignoreCase = true)
+        public static bool MatchDosPattern(string expression, ReadOnlySpan<char> name, bool ignoreCase = true)
         {
             return MatchPattern(expression, name, ignoreCase, useExtendedWildcards: true);
         }
 
-        internal static bool MatchPattern(string expression, ReadOnlySpan<char> name, bool ignoreCase, bool useExtendedWildcards)
+        /// <summary>
+        /// Return true if the given expression matches the given name. '*' and '?' are wildcards, '\' escapes.
+        /// </summary>
+        public static bool MatchSimplePattern(string expression, ReadOnlySpan<char> name, bool ignoreCase = true)
+        {
+            return MatchPattern(expression, name, ignoreCase, useExtendedWildcards: false);
+        }
+
+        private static bool MatchPattern(string expression, ReadOnlySpan<char> name, bool ignoreCase, bool useExtendedWildcards)
         {
             // The idea behind the algorithm is pretty simple. We keep track of all possible locations
             // in the regular expression that are matching the name. When the name has been exhausted,

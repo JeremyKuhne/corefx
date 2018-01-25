@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 
 namespace System.IO
 {
-    public partial class FindEnumerable<TResult, TState>
+    public abstract partial class FileSystemEnumerableBase<TResult, TState>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe bool GetData()
@@ -25,7 +25,7 @@ namespace System.IO
                         DirectoryFinished();
                         return false;
                     case Interop.Errors.ERROR_ACCESS_DENIED:
-                        if ((_options & FindOptions.IgnoreInaccessable) != 0)
+                        if (Options.IgnoreInaccessable)
                         {
                             return IntPtr.Zero;
                         }

@@ -8,10 +8,9 @@ namespace System.IO
 {
     partial class DirectoryInfo
     {
-        internal static unsafe DirectoryInfo Create<TState>(string fullPath, string fileName, ref FindData<TState> findData)
+        internal static unsafe DirectoryInfo Create(string fullPath, ref FileSystemEntry findData)
         {
-            Debug.Assert(fileName.Equals(Path.GetFileName(fullPath)));
-            DirectoryInfo info = new DirectoryInfo(fullPath, fileName: fileName, isNormalized: true);
+            DirectoryInfo info = new DirectoryInfo(fullPath, fileName: findData.FileName.GetStringFromFixedBuffer(), isNormalized: true);
             info.Init(findData._info);
             return info;
         }

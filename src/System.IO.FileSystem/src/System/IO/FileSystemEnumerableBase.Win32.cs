@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 
 namespace System.IO
 {
-    public partial class FindEnumerable<TResult, TState>
+    public abstract partial class FileSystemEnumerableBase<TResult, TState>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe bool GetData()
@@ -39,7 +39,7 @@ namespace System.IO
                     int error = (int)Interop.NtDll.RtlNtStatusToDosError(status);
 
                     // Note that there are many NT status codes that convert to ERROR_ACCESS_DENIED.
-                    if (error == Interop.Errors.ERROR_ACCESS_DENIED && (_options & FindOptions.IgnoreInaccessable) != 0)
+                    if (error == Interop.Errors.ERROR_ACCESS_DENIED && Options.IgnoreInaccessible)
                     {
                         // User wanted to skip on access denied.
                         DirectoryFinished();

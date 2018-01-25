@@ -197,7 +197,7 @@ namespace System.IO
             if ((searchOption != SearchOption.TopDirectoryOnly) && (searchOption != SearchOption.AllDirectories))
                 throw new ArgumentOutOfRangeException(nameof(searchOption), SR.ArgumentOutOfRange_Enum);
 
-            return searchOption == SearchOption.AllDirectories ? FindOptions.Recurse : FindOptions.None;
+            return searchOption == SearchOption.AllDirectories ? new FindOptions { Recurse = true } : default;
         }
     }
 }

@@ -223,60 +223,64 @@ namespace System.IO
         AllDirectories = 1,
         TopDirectoryOnly = 0,
     }
-    [Flags]
-    public enum FindOptions
+    public struct FindOptions
     {
-        None = 0x0,
-        Recurse = 0x0000_0001,
-        IgnoreInaccessable = 0x0000_0002,
-        UseLargeBuffer = 0x0000_0004
+        public bool Recurse { get { throw null; } set { } }
+        public bool IgnoreInaccessible { get { throw null; } set { } }
+        public int MinimumBufferSize { get { throw null; } set { } }
+        public FileAttributes SkipAttributes { get { throw null; } set { } }
     }
-    public delegate bool FindPredicate<TState>(ref FindData<TState> findData);
-    public delegate TResult FindTransform<TResult, TState>(ref FindData<TState> findData);
-    public ref struct FindData<TState>
+    public delegate bool FindPredicate<TState>(ref System.IO.FileSystemEntry entry, TState state);
+    public delegate TResult FindTransform<TResult, TState>(ref System.IO.FileSystemEntry entry, TState state);
+    public ref struct FileSystemEntry
     {
-        public string Directory { get { throw null; } }
-        public string OriginalDirectory { get { throw null; } }
-        public string OriginalUserDirectory { get { throw null; } }
-        public TState State { get { throw null; } }
+        public ReadOnlySpan<char> Directory { get { throw null; } }
+        public string RootDirectory { get { throw null; } }
+        public string OriginalRootDirectory { get { throw null; } }
         public ReadOnlySpan<char> FileName { get { throw null; } }
         public FileAttributes Attributes { get { throw null; } }
         public long Length { get { throw null; } }
-        public DateTime CreationTimeUtc { get { throw null; } }
-        public DateTime LastAccessTimeUtc { get { throw null; } }
-        public DateTime LastWriteTimeUtc { get { throw null; } }
+        public DateTimeOffset CreationTimeUtc { get { throw null; } }
+        public DateTimeOffset LastAccessTimeUtc { get { throw null; } }
+        public DateTimeOffset LastWriteTimeUtc { get { throw null; } }
+
+        public bool NotDotOrDotDot { get { throw null; } }
+        public bool IsDirectory { get { throw null; } }
+        public DirectoryInfo AsDirectoryInfo() { throw null; }
+        public FileInfo AsFileInfo() { throw null; }
+        public FileSystemInfo AsFileSystemInfo() { throw null; }
+        public string AsUserFullPath() { throw null; }
     }
-    public partial class FindEnumerable<TResult, TState> : Runtime.ConstrainedExecution.CriticalFinalizerObject, Collections.Generic.IEnumerable<TResult>, Collections.Generic.IEnumerator<TResult>
+    public abstract class FileSystemEnumerableBase<TResult, TState> : Runtime.ConstrainedExecution.CriticalFinalizerObject, Collections.Generic.IEnumerable<TResult>, Collections.Generic.IEnumerator<TResult>
     {
-        public FindEnumerable(string directory, FindTransform<TResult, TState> transform, FindPredicate<TState> predicate,
-            FindPredicate<TState> recursePredicate = null, TState state = default, FindOptions options = FindOptions.None) { }
+        protected FileSystemEnumerableBase(string directory) { }
+        public FindOptions Options { get { throw null; } set { } }
+        public TState State { get { throw null; } set { } }
+
+        public virtual bool AcceptEntry(ref FileSystemEntry entry) { throw null; }
+        public virtual bool RecurseEntry(ref FileSystemEntry entry) { throw null; }
+        public virtual TResult TransformEntry(ref FileSystemEntry entry) { throw null; }
+
+        protected abstract FileSystemEnumerableBase<TResult, TState> Clone();
+
         public Collections.Generic.IEnumerator<TResult> GetEnumerator() { throw null; }
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
-        public TResult Current { get { throw null;  } }
+        public TResult Current { get { throw null; } }
         object System.Collections.IEnumerator.Current { get { throw null; } }
         public bool MoveNext() { throw null; }
         public void Reset() { throw null; }
         public void Dispose() { throw null; }
     }
-    public static class DosMatcher
+    public class FileSystemEnumerable<TResult, TState> : FileSystemEnumerableBase<TResult, TState>
     {
-        public static string TranslateExpression(string expression) { throw null; }
-        public static bool MatchPattern(string expression, ReadOnlySpan<char> name, bool ignoreCase = true) { throw null; }
+        public FileSystemEnumerable(string directory, FindTransform<TResult, TState> transform, FindPredicate<TState> predicate): base(directory) { }
+        public FindPredicate<TState> RecursePredicate { get { throw null; } set { } }
+        protected override FileSystemEnumerableBase<TResult, TState> Clone() { throw null; }
     }
-    public static class SimpleMatcher
+    public static class NameMatchers
     {
-        public static bool MatchPattern(string expression, ReadOnlySpan<char> name, bool ignoreCase = true) { throw null; }
-    }
-    public static class FindPredicates
-    {
-        public static bool NotDotOrDotDot<TState>(ref FindData<TState> findData) { throw null; }
-        public static bool IsDirectory<TState>(ref FindData<TState> findData) { throw null; }
-    }
-    public static class FindTransforms
-    {
-        public static DirectoryInfo AsDirectoryInfo<TState>(ref FindData<TState> findData) { throw null; }
-        public static FileInfo AsFileInfo<TState>(ref FindData<TState> findData) { throw null; }
-        public static FileSystemInfo AsFileSystemInfo<TState>(ref FindData<TState> findData) { throw null; }
-        public static string AsUserFullPath<TState>(ref FindData<TState> findData) { throw null; }
+        public static string TranslateDosExpression(string expression) { throw null; }
+        public static bool MatchDosPattern(string expression, ReadOnlySpan<char> name, bool ignoreCase = true) { throw null; }
+        public static bool MatchSimplePattern(string expression, ReadOnlySpan<char> name, bool ignoreCase = true) { throw null; }
     }
 }

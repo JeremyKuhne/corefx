@@ -7,5 +7,5 @@ namespace System.IO
     /// <summary>
     /// Interface for filtering out find results.
     /// </summary>
-    public delegate bool FindPredicate<TState>(ref FindData<TState> findData);
+    public delegate bool FindPredicate<TState>(ref FileSystemEntry entry, TState state);
 }

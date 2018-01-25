@@ -11,7 +11,7 @@ namespace System.IO.Tests
         [Theory, MemberData(nameof(DosMatchData)), MemberData(nameof(EscapedDosMatchData))]
         public static void DosMatch(string expression, string name, bool ignoreCase, bool expected)
         {
-            Assert.Equal(expected, DosMatcher.MatchPattern(expression, name.AsReadOnlySpan(), ignoreCase));
+            Assert.Equal(expected, NameMatchers.MatchDosPattern(expression, name.AsReadOnlySpan(), ignoreCase));
         }
 
         public static TheoryData<string, string, bool, bool> EscapedDosMatchData => new TheoryData<string, string, bool, bool>

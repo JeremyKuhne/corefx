@@ -13,17 +13,16 @@ using System.Threading;
 
 namespace System.IO
 {
-    public unsafe partial class FindEnumerable<TResult, TState> : CriticalFinalizerObject, IEnumerable<TResult>, IEnumerator<TResult>
+    public unsafe abstract partial class FileSystemEnumerableBase<TResult, TState> : CriticalFinalizerObject, IEnumerable<TResult>, IEnumerator<TResult>
     {
         private const int StandardBufferSize = 4096;
 
+        // We need to have enough room for at least a single entry. The filename alone can be 512 bytes, we'll ensure we have
+        // a reasonable buffer for all of the other metadata as well.
+        private const int MinimumBufferSize = 1024;
+
         private readonly string _originalFullPath;
-        private readonly string _originalUserPath;
-        private readonly FindOptions _options;
-        private readonly FindTransform<TResult, TState> _transform;
-        private readonly FindPredicate<TState> _predicate;
-        private readonly FindPredicate<TState> _recursePredicate;
-        private readonly TState _state;
+        protected readonly string OriginalPath;
 
         private object _lock = new object();
         private int _enumeratorCreated;
@@ -42,43 +41,26 @@ namespace System.IO
         /// Encapsulates a find operation.
         /// </summary>
         /// <param name="directory">The directory to search in.</param>
-        public FindEnumerable(
-            string directory,
-            FindTransform<TResult, TState> transform,
-            FindPredicate<TState> predicate,
-            // Only used if FindOptions.Recurse is set. Default is to always recurse.
-            FindPredicate<TState> recursePredicate = null,
-            TState state = default,
-            FindOptions options = FindOptions.None)
+        public FileSystemEnumerableBase(string directory)
         {
-            _originalUserPath = directory;
+            OriginalPath = directory ?? throw new ArgumentNullException(nameof(directory));
             _originalFullPath = Path.GetFullPath(directory);
-            _options = options;
-            _predicate = predicate ?? throw new ArgumentNullException(nameof(predicate));
-            _transform = transform ?? throw new ArgumentNullException(nameof(transform));
-            _recursePredicate = recursePredicate;
-            _state = state;
-            Initialize();
+
+            // We'll only suppress the media insertion prompt on the topmost directory
+            using (new DisableMediaInsertionPrompt())
+            {
+                // We need to initialize the directory handle up front to ensure
+                // we immediately throw IO exceptions for missing directory/etc.
+                _directoryHandle = CreateDirectoryHandle(_originalFullPath);
+            }
         }
 
-        private FindEnumerable(
-            string originalUserPath,
-            string originalFullPath,
-            FindTransform<TResult, TState> transform,
-            FindPredicate<TState> predicate,
-            FindPredicate<TState> recursePredicate,
-            TState state,
-            FindOptions options)
-        {
-            _originalUserPath = originalUserPath;
-            _originalFullPath = originalFullPath;
-            _predicate = predicate;
-            _recursePredicate = recursePredicate;
-            _transform = transform;
-            _state = state;
-            _options = options;
-            Initialize();
-        }
+        public FindOptions Options { get; set; }
+        public TState State { get; set; }
+
+        public virtual bool AcceptEntry(ref FileSystemEntry entry) => true;
+        public virtual bool RecurseEntry(ref FileSystemEntry entry) => true;
+        public virtual TResult TransformEntry(ref FileSystemEntry entry) => default;
 
         /// <summary>
         /// Simple wrapper to allow creating a file handle for an existing directory.
@@ -99,7 +81,7 @@ namespace System.IO
                 switch (error)
                 {
                     case Interop.Errors.ERROR_ACCESS_DENIED:
-                        if ((_options & FindOptions.IgnoreInaccessable) != 0)
+                        if (Options.IgnoreInaccessible)
                         {
                             return IntPtr.Zero;
                         }
@@ -123,34 +105,23 @@ namespace System.IO
                 return Enumerable.Empty<TResult>().GetEnumerator();
             }
 
-            if (Interlocked.Exchange(ref _enumeratorCreated, 1) == 0)
-            {
-                return this;
-            }
-            else
-            {
-                return new FindEnumerable<TResult, TState>(_originalUserPath, _originalFullPath, _transform, _predicate, _recursePredicate, _state, _options);
-            }
+            FileSystemEnumerableBase<TResult, TState> enumerator = Interlocked.Exchange(ref _enumeratorCreated, 1) == 0 ? this : Clone();
+            enumerator.Initialize();
+            return enumerator;
         }
+
+        protected abstract FileSystemEnumerableBase<TResult, TState> Clone();
 
         private void Initialize()
         {
             _currentPath = _originalFullPath;
 
-            int bufferSize = StandardBufferSize;
-            if ((_options & FindOptions.UseLargeBuffer) != 0)
-                bufferSize *= 4;
+            int requestedBufferSize = Options.MinimumBufferSize;
+            int bufferSize = requestedBufferSize <= 0 ? StandardBufferSize
+                : Math.Max(MinimumBufferSize, requestedBufferSize);
 
             _buffer = ArrayPool<byte>.Shared.Rent(bufferSize);
             _pinnedBuffer = GCHandle.Alloc(_buffer, GCHandleType.Pinned);
-            if ((_options & FindOptions.Recurse) != 0)
-                _pending = new Queue<(IntPtr, string)>();
-
-            // We'll only suppress the media insertion prompt on the topmost directory
-            using (new DisableMediaInsertionPrompt())
-            {
-                _directoryHandle = CreateDirectoryHandle(_originalFullPath);
-            }
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -165,24 +136,23 @@ namespace System.IO
                 return false;
 
             bool acquiredLock = false;
-            if ((_options & FindOptions.AvoidLocking) == 0)
-                Monitor.Enter(_lock, ref acquiredLock);
+            Monitor.Enter(_lock, ref acquiredLock);
 
             try
             {
                 if (_lastEntryFound)
                     return false;
 
-                FindData<TState> findData = default;
+                FileSystemEntry findData = default;
                 do
                 {
                     FindNextFile();
                     if (!_lastEntryFound && _info != null)
                     {
                         // If needed, stash any subdirectories to process later
-                        if ((_options & FindOptions.Recurse) != 0 && (_info->FileAttributes & FileAttributes.Directory) != 0
+                        if (Options.Recurse && (_info->FileAttributes & FileAttributes.Directory) != 0
                             && !PathHelpers.IsDotOrDotDot(_info->FileName)
-                            && (_recursePredicate == null || _recursePredicate(ref findData)))
+                            && RecurseEntry(ref findData))
                         {
                             string subDirectory = PathHelpers.CombineNoChecks(_currentPath, _info->FileName);
                             IntPtr subDirectoryHandle = CreateDirectoryHandle(subDirectory);
@@ -190,7 +160,8 @@ namespace System.IO
                             {
                                 try
                                 {
-                                    // It is possible this might allocate and run out of memory
+                                    if (_pending == null)
+                                        _pending = new Queue<(IntPtr, string)>();
                                     _pending.Enqueue((subDirectoryHandle, subDirectory));
                                 }
                                 catch
@@ -201,12 +172,12 @@ namespace System.IO
                             }
                         }
 
-                        findData = new FindData<TState>(_info, _currentPath, _originalFullPath, _originalUserPath, _state);
+                        findData = new FileSystemEntry(_info, _currentPath, _originalFullPath, OriginalPath);
                     }
-                } while (!_lastEntryFound && !_predicate(ref findData));
+                } while (!_lastEntryFound && !AcceptEntry(ref findData));
 
                 if (!_lastEntryFound)
-                    _current = _transform(ref findData);
+                    _current = TransformEntry(ref findData);
 
                 return !_lastEntryFound;
             }
@@ -266,8 +237,7 @@ namespace System.IO
             if (_lock != null)
             {
                 bool acquiredLock = false;
-                if ((_options & FindOptions.AvoidLocking) == 0)
-                    Monitor.Enter(_lock, ref acquiredLock);
+                Monitor.Enter(_lock, ref acquiredLock);
 
                 try
                 {
@@ -277,7 +247,7 @@ namespace System.IO
                     Interop.Kernel32.CloseHandle(_directoryHandle);
                     _directoryHandle = IntPtr.Zero;
 
-                    if ((_options & FindOptions.Recurse) != 0 && _pending != null)
+                    if (Options.Recurse && _pending != null)
                     {
                         while (_pending.Count > 0)
                             Interop.Kernel32.CloseHandle(_pending.Dequeue().Handle);
@@ -300,7 +270,7 @@ namespace System.IO
             }
         }
 
-        ~FindEnumerable()
+        ~FileSystemEnumerableBase()
         {
             Dispose(disposing: false);
         }
