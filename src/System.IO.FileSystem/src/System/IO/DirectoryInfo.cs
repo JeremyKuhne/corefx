@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO.Enumeration;
 
 namespace System.IO
 {
@@ -117,105 +118,105 @@ namespace System.IO
         }
 
         // Returns an array of Files in the DirectoryInfo specified by path
-        public FileInfo[] GetFiles() => GetFiles("*", findOptions: default);
+        public FileInfo[] GetFiles() => GetFiles("*", enumerationOptions: EnumerationOptions.Default);
 
         // Returns an array of Files in the current DirectoryInfo matching the 
         // given search criteria (i.e. "*.txt").
-        public FileInfo[] GetFiles(string searchPattern) => GetFiles(searchPattern, findOptions: default);
+        public FileInfo[] GetFiles(string searchPattern) => GetFiles(searchPattern, enumerationOptions: EnumerationOptions.Default);
 
-        public FileInfo[] GetFiles(string searchPattern, SearchOption searchOption) => GetFiles(searchPattern, PathHelpers.GetFindOptions(searchOption));
+        public FileInfo[] GetFiles(string searchPattern, SearchOption searchOption) => GetFiles(searchPattern, PathHelpers.GetEnumerationOptions(searchOption));
 
-        public FileInfo[] GetFiles(string searchPattern, FindOptions findOptions)
+        public FileInfo[] GetFiles(string searchPattern, EnumerationOptions enumerationOptions)
         {
             if (searchPattern == null)
                 throw new ArgumentNullException(nameof(searchPattern));
 
-            return EnumerableHelpers.ToArray((IEnumerable<FileInfo>)InternalEnumerateInfos(FullPath, searchPattern, SearchTarget.Files, findOptions));
+            return EnumerableHelpers.ToArray((IEnumerable<FileInfo>)InternalEnumerateInfos(FullPath, searchPattern, SearchTarget.Files, enumerationOptions));
         }
 
         // Returns an array of strongly typed FileSystemInfo entries which will contain a listing
         // of all the files and directories.
-        public FileSystemInfo[] GetFileSystemInfos() => GetFileSystemInfos("*", findOptions: default);
+        public FileSystemInfo[] GetFileSystemInfos() => GetFileSystemInfos("*", enumerationOptions: EnumerationOptions.Default);
 
         // Returns an array of strongly typed FileSystemInfo entries in the path with the
         // given search criteria (i.e. "*.txt").
-        public FileSystemInfo[] GetFileSystemInfos(string searchPattern) => GetFileSystemInfos(searchPattern, findOptions: default);
+        public FileSystemInfo[] GetFileSystemInfos(string searchPattern) => GetFileSystemInfos(searchPattern, enumerationOptions: EnumerationOptions.Default);
 
-        public FileSystemInfo[] GetFileSystemInfos(string searchPattern, SearchOption searchOption) => GetFileSystemInfos(searchPattern, PathHelpers.GetFindOptions(searchOption));
+        public FileSystemInfo[] GetFileSystemInfos(string searchPattern, SearchOption searchOption) => GetFileSystemInfos(searchPattern, PathHelpers.GetEnumerationOptions(searchOption));
 
-        public FileSystemInfo[] GetFileSystemInfos(string searchPattern, FindOptions findOptions)
+        public FileSystemInfo[] GetFileSystemInfos(string searchPattern, EnumerationOptions enumerationOptions)
         {
             if (searchPattern == null)
                 throw new ArgumentNullException(nameof(searchPattern));
 
-            return EnumerableHelpers.ToArray(InternalEnumerateInfos(FullPath, searchPattern, SearchTarget.Both, findOptions));
+            return EnumerableHelpers.ToArray(InternalEnumerateInfos(FullPath, searchPattern, SearchTarget.Both, enumerationOptions));
         }
 
         // Returns an array of Directories in the current directory.
-        public DirectoryInfo[] GetDirectories() => GetDirectories("*", findOptions: default);
+        public DirectoryInfo[] GetDirectories() => GetDirectories("*", enumerationOptions: EnumerationOptions.Default);
 
         // Returns an array of Directories in the current DirectoryInfo matching the 
         // given search criteria (i.e. "System*" could match the System & System32 directories).
-        public DirectoryInfo[] GetDirectories(string searchPattern) => GetDirectories(searchPattern, findOptions: default);
+        public DirectoryInfo[] GetDirectories(string searchPattern) => GetDirectories(searchPattern, enumerationOptions: EnumerationOptions.Default);
 
-        public DirectoryInfo[] GetDirectories(string searchPattern, SearchOption searchOption) => GetDirectories(searchPattern, PathHelpers.GetFindOptions(searchOption));
+        public DirectoryInfo[] GetDirectories(string searchPattern, SearchOption searchOption) => GetDirectories(searchPattern, PathHelpers.GetEnumerationOptions(searchOption));
 
-        public DirectoryInfo[] GetDirectories(string searchPattern, FindOptions findOptions)
+        public DirectoryInfo[] GetDirectories(string searchPattern, EnumerationOptions enumerationOptions)
         {
             if (searchPattern == null)
                 throw new ArgumentNullException(nameof(searchPattern));
 
-            return EnumerableHelpers.ToArray((IEnumerable<DirectoryInfo>)InternalEnumerateInfos(FullPath, searchPattern, SearchTarget.Directories, findOptions));
+            return EnumerableHelpers.ToArray((IEnumerable<DirectoryInfo>)InternalEnumerateInfos(FullPath, searchPattern, SearchTarget.Directories, enumerationOptions));
         }
 
-        public IEnumerable<DirectoryInfo> EnumerateDirectories() => EnumerateDirectories("*", findOptions: default);
+        public IEnumerable<DirectoryInfo> EnumerateDirectories() => EnumerateDirectories("*", enumerationOptions: EnumerationOptions.Default);
 
-        public IEnumerable<DirectoryInfo> EnumerateDirectories(string searchPattern) => EnumerateDirectories(searchPattern, findOptions: default);
+        public IEnumerable<DirectoryInfo> EnumerateDirectories(string searchPattern) => EnumerateDirectories(searchPattern, enumerationOptions: EnumerationOptions.Default);
 
-        public IEnumerable<DirectoryInfo> EnumerateDirectories(string searchPattern, SearchOption searchOption) => EnumerateDirectories(searchPattern, PathHelpers.GetFindOptions(searchOption));
+        public IEnumerable<DirectoryInfo> EnumerateDirectories(string searchPattern, SearchOption searchOption) => EnumerateDirectories(searchPattern, PathHelpers.GetEnumerationOptions(searchOption));
 
-        public IEnumerable<DirectoryInfo> EnumerateDirectories(string searchPattern, FindOptions findOptions)
+        public IEnumerable<DirectoryInfo> EnumerateDirectories(string searchPattern, EnumerationOptions enumerationOptions)
         {
             if (searchPattern == null)
                 throw new ArgumentNullException(nameof(searchPattern));
 
-            return (IEnumerable<DirectoryInfo>)InternalEnumerateInfos(FullPath, searchPattern, SearchTarget.Directories, findOptions);
+            return (IEnumerable<DirectoryInfo>)InternalEnumerateInfos(FullPath, searchPattern, SearchTarget.Directories, enumerationOptions);
         }
 
-        public IEnumerable<FileInfo> EnumerateFiles() => EnumerateFiles("*", findOptions: default);
+        public IEnumerable<FileInfo> EnumerateFiles() => EnumerateFiles("*", enumerationOptions: EnumerationOptions.Default);
 
-        public IEnumerable<FileInfo> EnumerateFiles(string searchPattern) => EnumerateFiles(searchPattern, findOptions: default);
+        public IEnumerable<FileInfo> EnumerateFiles(string searchPattern) => EnumerateFiles(searchPattern, enumerationOptions: EnumerationOptions.Default);
 
-        public IEnumerable<FileInfo> EnumerateFiles(string searchPattern, SearchOption searchOption) => EnumerateFiles(searchPattern, PathHelpers.GetFindOptions(searchOption));
+        public IEnumerable<FileInfo> EnumerateFiles(string searchPattern, SearchOption searchOption) => EnumerateFiles(searchPattern, PathHelpers.GetEnumerationOptions(searchOption));
 
-        public IEnumerable<FileInfo> EnumerateFiles(string searchPattern, FindOptions findOptions)
+        public IEnumerable<FileInfo> EnumerateFiles(string searchPattern, EnumerationOptions enumerationOptions)
         {
             if (searchPattern == null)
                 throw new ArgumentNullException(nameof(searchPattern));
 
-            return (IEnumerable<FileInfo>)InternalEnumerateInfos(FullPath, searchPattern, SearchTarget.Files, findOptions);
+            return (IEnumerable<FileInfo>)InternalEnumerateInfos(FullPath, searchPattern, SearchTarget.Files, enumerationOptions);
         }
 
-        public IEnumerable<FileSystemInfo> EnumerateFileSystemInfos() => EnumerateFileSystemInfos("*", findOptions: default);
+        public IEnumerable<FileSystemInfo> EnumerateFileSystemInfos() => EnumerateFileSystemInfos("*", enumerationOptions: EnumerationOptions.Default);
 
-        public IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(string searchPattern) => EnumerateFileSystemInfos(searchPattern, findOptions: default);
+        public IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(string searchPattern) => EnumerateFileSystemInfos(searchPattern, enumerationOptions: EnumerationOptions.Default);
 
         public IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(string searchPattern, SearchOption searchOption)
-            => EnumerateFileSystemInfos(searchPattern, PathHelpers.GetFindOptions(searchOption));
+            => EnumerateFileSystemInfos(searchPattern, PathHelpers.GetEnumerationOptions(searchOption));
 
-        public IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(string searchPattern, FindOptions findOptions)
+        public IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(string searchPattern, EnumerationOptions enumerationOptions)
         {
             if (searchPattern == null)
                 throw new ArgumentNullException(nameof(searchPattern));
 
-            return InternalEnumerateInfos(FullPath, searchPattern, SearchTarget.Both, findOptions);
+            return InternalEnumerateInfos(FullPath, searchPattern, SearchTarget.Both, enumerationOptions);
         }
 
         internal static IEnumerable<FileSystemInfo> InternalEnumerateInfos(
             string path,
             string searchPattern,
             SearchTarget searchTarget,
-            FindOptions findOptions = default)
+            EnumerationOptions enumerationOptions)
         {
             Debug.Assert(path != null);
             Debug.Assert(searchPattern != null);
@@ -225,11 +226,11 @@ namespace System.IO
             switch (searchTarget)
             {
                 case SearchTarget.Directories:
-                    return FileSystemEnumerableFactory.DirectoryInfos(path, searchPattern, findOptions);
+                    return FileSystemEnumerableFactory.DirectoryInfos(path, searchPattern, enumerationOptions);
                 case SearchTarget.Files:
-                    return FileSystemEnumerableFactory.FileInfos(path, searchPattern, findOptions);
+                    return FileSystemEnumerableFactory.FileInfos(path, searchPattern, enumerationOptions);
                 case SearchTarget.Both:
-                    return FileSystemEnumerableFactory.FileSystemInfos(path, searchPattern, findOptions);
+                    return FileSystemEnumerableFactory.FileSystemInfos(path, searchPattern, enumerationOptions);
                 default:
                     throw new ArgumentException(SR.ArgumentOutOfRange_Enum, nameof(searchTarget));
             }

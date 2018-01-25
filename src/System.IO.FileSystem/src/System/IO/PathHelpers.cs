@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.IO.Enumeration;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -192,12 +193,12 @@ namespace System.IO
         /// <summary>
         /// Converts SearchOptions to FindOptions. Throws if undefined SearchOption.
         /// </summary>
-        internal static FindOptions GetFindOptions(SearchOption searchOption)
+        internal static EnumerationOptions GetEnumerationOptions(SearchOption searchOption)
         {
             if ((searchOption != SearchOption.TopDirectoryOnly) && (searchOption != SearchOption.AllDirectories))
                 throw new ArgumentOutOfRangeException(nameof(searchOption), SR.ArgumentOutOfRange_Enum);
 
-            return searchOption == SearchOption.AllDirectories ? new FindOptions { Recurse = true } : default;
+            return searchOption == SearchOption.AllDirectories ? new EnumerationOptions { Recurse = true } : EnumerationOptions.Default;
         }
     }
 }

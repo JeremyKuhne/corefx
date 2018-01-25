@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace System.IO
+namespace System.IO.Enumeration
 {
     internal static class FileSystemEnumerableFactory
     {
@@ -33,116 +33,116 @@ namespace System.IO
         }
 
         internal static FileSystemEnumerable<string, string> UserFiles(string directory,
-            string expression = "*",
-            FindOptions options = default)
+            string expression,
+            EnumerationOptions options)
         {
             return new FileSystemEnumerable<string, string>(
                 directory,
-                (ref FileSystemEntry findData, string state) => findData.AsUserFullPath(),
+                (ref FileSystemEntry findData, string state) => findData.ToUserFullPath(),
                 (ref FileSystemEntry findData, string state) =>
                 {
-                    return findData.NotDotOrDotDot
+                    return !findData.IsNameDotOrDotDot
                         && !findData.IsDirectory
-                        && NameMatchers.MatchDosPattern(state, findData.FileName, ignoreCase: true);
+                        && NameMatching.MatchDosPattern(state, findData.FileName, ignoreCase: true);
                 })
             {
-                State = NameMatchers.TranslateDosExpression(expression),
+                State = NameMatching.TranslateDosExpression(expression),
                 Options = options
             };
         }
 
         internal static FileSystemEnumerable<string, string> UserDirectories(string directory,
-            string expression = "*",
-            FindOptions options = default)
+            string expression,
+            EnumerationOptions options)
         {
             return new FileSystemEnumerable<string, string>(
                 directory,
-                (ref FileSystemEntry findData, string state) => findData.AsUserFullPath(),
+                (ref FileSystemEntry findData, string state) => findData.ToUserFullPath(),
                 (ref FileSystemEntry findData, string state) =>
                 {
-                    return findData.NotDotOrDotDot
+                    return !findData.IsNameDotOrDotDot
                         && findData.IsDirectory
-                        && NameMatchers.MatchDosPattern(state, findData.FileName, ignoreCase: true);
+                        && NameMatching.MatchDosPattern(state, findData.FileName, ignoreCase: true);
                 })
             {
-                State = NameMatchers.TranslateDosExpression(expression),
+                State = NameMatching.TranslateDosExpression(expression),
                 Options = options
             };
         }
 
         internal static FileSystemEnumerable<string, string> UserEntries(string directory,
-            string expression = "*",
-            FindOptions options = default)
+            string expression,
+            EnumerationOptions options)
         {
             return new FileSystemEnumerable<string, string>(
                 directory,
-                (ref FileSystemEntry findData, string state) => findData.AsUserFullPath(),
+                (ref FileSystemEntry findData, string state) => findData.ToUserFullPath(),
                 (ref FileSystemEntry findData, string state) =>
                 {
-                    return findData.NotDotOrDotDot
-                        && NameMatchers.MatchDosPattern(state, findData.FileName, ignoreCase: true);
+                    return !findData.IsNameDotOrDotDot
+                        && NameMatching.MatchDosPattern(state, findData.FileName, ignoreCase: true);
                 })
             {
-                State = NameMatchers.TranslateDosExpression(expression),
+                State = NameMatching.TranslateDosExpression(expression),
                 Options = options
             };
         }
 
         internal static FileSystemEnumerable<FileInfo, string> FileInfos(
             string directory,
-            string expression = "*",
-            FindOptions options = default)
+            string expression,
+            EnumerationOptions options)
         {
              return new FileSystemEnumerable<FileInfo, string>(
                 directory,
-                (ref FileSystemEntry findData, string state) => findData.AsFileInfo(),
+                (ref FileSystemEntry findData, string state) => findData.ToFileInfo(),
                 (ref FileSystemEntry findData, string state) =>
                 {
-                    return findData.NotDotOrDotDot
+                    return !findData.IsNameDotOrDotDot
                         && !findData.IsDirectory
-                        && NameMatchers.MatchDosPattern(state, findData.FileName, ignoreCase: true);
+                        && NameMatching.MatchDosPattern(state, findData.FileName, ignoreCase: true);
                 })
              {
-                 State = NameMatchers.TranslateDosExpression(expression),
+                 State = NameMatching.TranslateDosExpression(expression),
                  Options = options
              };
         }
 
         internal static FileSystemEnumerable<DirectoryInfo, string> DirectoryInfos(
             string directory,
-            string expression = "*",
-            FindOptions options = default)
+            string expression,
+            EnumerationOptions options)
         {
             return new FileSystemEnumerable<DirectoryInfo, string>(
                directory,
-               (ref FileSystemEntry findData, string state) => findData.AsDirectoryInfo(),
+               (ref FileSystemEntry findData, string state) => findData.ToDirectoryInfo(),
                (ref FileSystemEntry findData, string state) =>
                {
-                   return findData.NotDotOrDotDot
+                   return !findData.IsNameDotOrDotDot
                        && findData.IsDirectory
-                       && NameMatchers.MatchDosPattern(state, findData.FileName, ignoreCase: true);
+                       && NameMatching.MatchDosPattern(state, findData.FileName, ignoreCase: true);
                })
             {
-                State = NameMatchers.TranslateDosExpression(expression),
+                State = NameMatching.TranslateDosExpression(expression),
                 Options = options
             };
         }
 
         internal static FileSystemEnumerable<FileSystemInfo, string> FileSystemInfos(
             string directory,
-            string expression = "*",
-            FindOptions options = default)
+            string expression,
+            EnumerationOptions options)
         {
             return new FileSystemEnumerable<FileSystemInfo, string>(
                directory,
-               (ref FileSystemEntry findData, string state) => findData.AsFileSystemInfo(),
+               (ref FileSystemEntry findData, string state) => findData.ToFileSystemInfo(),
                (ref FileSystemEntry findData, string state) =>
                {
-                   return findData.NotDotOrDotDot
-                       && NameMatchers.MatchDosPattern(state, findData.FileName, ignoreCase: true);
+                   return !findData.IsNameDotOrDotDot
+                       && NameMatching.MatchDosPattern(state, findData.FileName, ignoreCase: true);
                })
             {
-                State = NameMatchers.TranslateDosExpression(expression),
+                State = NameMatching.TranslateDosExpression(expression),
                 Options = options
             };
         }

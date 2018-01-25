@@ -5,9 +5,9 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace System.IO
+namespace System.IO.Enumeration
 {
-    public abstract partial class FileSystemEnumerableBase<TResult, TState>
+    public abstract partial class FileSystemEnumerableBase<TResult>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe bool GetData()

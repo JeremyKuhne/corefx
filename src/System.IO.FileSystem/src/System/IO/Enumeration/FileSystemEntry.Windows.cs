@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace System.IO
+namespace System.IO.Enumeration
 {
     /// <summary>
     /// Lower level view of FileSystemInfo used for processing and filtering find results.
@@ -58,28 +58,22 @@ namespace System.IO
         public DateTimeOffset LastWriteTimeUtc => _info->LastWriteTime.ToDateTimeOffset();
 
         /// <summary>
-        /// Returns true if this entry is not one of the special current (".") and
+        /// Returns true if this entry's name is one of the special current (".") and
         /// parent ("..") directory entries.
         /// </summary>
-        public bool NotDotOrDotDot => !PathHelpers.IsDotOrDotDot(FileName);
+        public bool IsNameDotOrDotDot => PathHelpers.IsDotOrDotDot(FileName);
 
         /// <summary>
         /// Returns true if this entry is a directory.
         /// </summary>
-        public bool IsDirectory =>
-            AttributesAreValid && (Attributes & FileAttributes.Directory) != 0;
+        public bool IsDirectory => (Attributes & FileAttributes.Directory) != 0;
 
-        /// <summary>
-        /// Returns true if the file attributes are valid.
-        /// </summary>
-        public bool AttributesAreValid => Attributes != (FileAttributes)(-1);
+        public DirectoryInfo ToDirectoryInfo() => DirectoryInfo.Create(PathHelpers.CombineNoChecks(Directory, FileName), ref this);
 
-        public DirectoryInfo AsDirectoryInfo() => DirectoryInfo.Create(PathHelpers.CombineNoChecks(Directory, FileName), ref this);
-
-        public FileInfo AsFileInfo()
+        public FileInfo ToFileInfo()
             => FileInfo.Create(PathHelpers.CombineNoChecks(Directory, FileName), ref this);
 
-        public FileSystemInfo AsFileSystemInfo()
+        public FileSystemInfo ToFileSystemInfo()
         {
             string fullPath = PathHelpers.CombineNoChecks(Directory, FileName);
 
@@ -91,7 +85,7 @@ namespace System.IO
         /// <summary>
         /// Returns the full path for find results, based on the initially provided path.
         /// </summary>
-        public string AsUserFullPath() =>
+        public string ToUserFullPath() =>
             PathHelpers.CombineNoChecks(OriginalRootDirectory, Directory.Slice(RootDirectory.Length), FileName);
     }
 }

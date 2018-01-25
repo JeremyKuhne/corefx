@@ -5,9 +5,12 @@
 using System;
 using System.Text;
 
-namespace System.IO
+namespace System.IO.Enumeration
 {
-    public static class NameMatchers
+    /// <summary>
+    /// Provides methods for matching file system names.
+    /// </summary>
+    public static class NameMatching
     {
         // [MS - FSA] 2.1.4.4 Algorithm for Determining if a FileName Is in an Expression
         // https://msdn.microsoft.com/en-us/library/ff469270.aspx

@@ -2,10 +2,18 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace System.IO
+namespace System.IO.Enumeration
 {
-    public struct FindOptions
+    public struct EnumerationOptions
     {
+        /// <summary>
+        /// Create an enumeration options struct with the default options.
+        /// </summary>
+        /// <remarks>
+        /// The implementation here may get more complicated as we add more options.
+        /// </remarks>
+        public static EnumerationOptions Default => default;
+
         /// <summary>
         /// Enumerate subdirectories
         /// </summary>
@@ -24,6 +32,6 @@ namespace System.IO
         /// <summary>
         /// Skip entries with the given attributes.
         /// </summary>
-        public FileAttributes SkipAttributes { get; set; }
+        public FileAttributes AttributesToSkip { get; set; }
     }
 }

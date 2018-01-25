@@ -11,9 +11,9 @@ using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Threading;
 
-namespace System.IO
+namespace System.IO.Enumeration
 {
-    public unsafe abstract partial class FileSystemEnumerableBase<TResult, TState> : CriticalFinalizerObject, IEnumerable<TResult>, IEnumerator<TResult>
+    public unsafe abstract partial class FileSystemEnumerableBase<TResult> : CriticalFinalizerObject, IEnumerable<TResult>, IEnumerator<TResult>
     {
         private const int StandardBufferSize = 4096;
 
@@ -55,12 +55,12 @@ namespace System.IO
             }
         }
 
-        public FindOptions Options { get; set; }
-        public TState State { get; set; }
+        public EnumerationOptions Options { get; set; }
 
-        public virtual bool AcceptEntry(ref FileSystemEntry entry) => true;
-        public virtual bool RecurseEntry(ref FileSystemEntry entry) => true;
-        public virtual TResult TransformEntry(ref FileSystemEntry entry) => default;
+        protected virtual bool ShouldIncludeEntry(ref FileSystemEntry entry) => true;
+        protected virtual bool ShouldRecurseIntoEntry(ref FileSystemEntry entry) => true;
+        protected virtual TResult TransformEntry(ref FileSystemEntry entry) => default;
+        protected virtual void OnDirectoryFinished(ReadOnlySpan<char> directory) { }
 
         /// <summary>
         /// Simple wrapper to allow creating a file handle for an existing directory.
@@ -105,12 +105,12 @@ namespace System.IO
                 return Enumerable.Empty<TResult>().GetEnumerator();
             }
 
-            FileSystemEnumerableBase<TResult, TState> enumerator = Interlocked.Exchange(ref _enumeratorCreated, 1) == 0 ? this : Clone();
+            FileSystemEnumerableBase<TResult> enumerator = Interlocked.Exchange(ref _enumeratorCreated, 1) == 0 ? this : Clone();
             enumerator.Initialize();
             return enumerator;
         }
 
-        protected abstract FileSystemEnumerableBase<TResult, TState> Clone();
+        protected abstract FileSystemEnumerableBase<TResult> Clone();
 
         private void Initialize()
         {
@@ -152,7 +152,8 @@ namespace System.IO
                         // If needed, stash any subdirectories to process later
                         if (Options.Recurse && (_info->FileAttributes & FileAttributes.Directory) != 0
                             && !PathHelpers.IsDotOrDotDot(_info->FileName)
-                            && RecurseEntry(ref findData))
+                            && (_info->FileAttributes & Options.AttributesToSkip) == 0
+                            && ShouldRecurseIntoEntry(ref findData))
                         {
                             string subDirectory = PathHelpers.CombineNoChecks(_currentPath, _info->FileName);
                             IntPtr subDirectoryHandle = CreateDirectoryHandle(subDirectory);
@@ -174,7 +175,7 @@ namespace System.IO
 
                         findData = new FileSystemEntry(_info, _currentPath, _originalFullPath, OriginalPath);
                     }
-                } while (!_lastEntryFound && !AcceptEntry(ref findData));
+                } while (!_lastEntryFound && ((_info->FileAttributes & Options.AttributesToSkip) != 0 || !ShouldIncludeEntry(ref findData)));
 
                 if (!_lastEntryFound)
                     _current = TransformEntry(ref findData);
@@ -207,6 +208,12 @@ namespace System.IO
         private void DirectoryFinished()
         {
             _info = null;
+
+            // Close the handle now that we're done
+            Interop.Kernel32.CloseHandle(_directoryHandle);
+            _directoryHandle = IntPtr.Zero;
+            OnDirectoryFinished(_currentPath);
+
             if (_pending == null || _pending.Count == 0)
             {
                 _lastEntryFound = true;
@@ -214,7 +221,6 @@ namespace System.IO
             else
             {
                 // Grab the next directory to parse
-                Interop.Kernel32.CloseHandle(_directoryHandle);
                 (_directoryHandle, _currentPath) = _pending.Dequeue();
                 FindNextFile();
             }
