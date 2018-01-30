@@ -66,7 +66,7 @@ namespace System.IO.Enumeration
 
             _currentPath = _originalFullPath;
 
-            int requestedBufferSize = _options.MinimumBufferSize;
+            int requestedBufferSize = _options.BufferSize;
             int bufferSize = requestedBufferSize <= 0 ? StandardBufferSize
                 : Math.Max(MinimumBufferSize, requestedBufferSize);
 
@@ -92,9 +92,9 @@ namespace System.IO.Enumeration
         }
 
 
-        protected virtual bool ShouldIncludeEntry(ref FileSystemEntry entry) => true;
-        protected virtual bool ShouldRecurseIntoEntry(ref FileSystemEntry entry) => true;
-        protected virtual TResult TransformEntry(ref FileSystemEntry entry) => default;
+        protected virtual bool ShouldIncludeEntry(in FileSystemEntry entry) => true;
+        protected virtual bool ShouldRecurseIntoEntry(in FileSystemEntry entry) => true;
+        protected virtual TResult TransformEntry(in FileSystemEntry entry) => default;
         protected virtual void OnDirectoryFinished(ReadOnlySpan<char> directory) { }
 
         /// <summary>
@@ -159,7 +159,7 @@ namespace System.IO.Enumeration
                         if (_options.Recurse && (_info->FileAttributes & FileAttributes.Directory) != 0
                             && !PathHelpers.IsDotOrDotDot(_info->FileName)
                             && (_info->FileAttributes & _options.AttributesToSkip) == 0
-                            && ShouldRecurseIntoEntry(ref findData))
+                            && ShouldRecurseIntoEntry(in findData))
                         {
                             string subDirectory = PathHelpers.CombineNoChecks(_currentPath, _info->FileName);
                             IntPtr subDirectoryHandle = CreateDirectoryHandle(subDirectory);
@@ -181,10 +181,10 @@ namespace System.IO.Enumeration
 
                         findData = new FileSystemEntry(_info, _currentPath, _originalFullPath, OriginalPath);
                     }
-                } while (!_lastEntryFound && ((_info->FileAttributes & _options.AttributesToSkip) != 0 || !ShouldIncludeEntry(ref findData)));
+                } while (!_lastEntryFound && ((_info->FileAttributes & _options.AttributesToSkip) != 0 || !ShouldIncludeEntry(in findData)));
 
                 if (!_lastEntryFound)
-                    _current = TransformEntry(ref findData);
+                    _current = TransformEntry(in findData);
 
                 return !_lastEntryFound;
             }

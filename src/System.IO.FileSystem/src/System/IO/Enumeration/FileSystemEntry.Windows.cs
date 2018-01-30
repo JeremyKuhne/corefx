@@ -85,7 +85,13 @@ namespace System.IO.Enumeration
         /// <summary>
         /// Returns the full path for find results, based on the initially provided path.
         /// </summary>
-        public string ToUserFullPath() =>
+        public string ToSpecifiedFullPath() =>
             PathHelpers.CombineNoChecks(OriginalRootDirectory, Directory.Slice(RootDirectory.Length), FileName);
+
+        /// <summary>
+        /// Returns the full path of the find result.
+        /// </summary>
+        public string ToFullPath() =>
+            PathHelpers.CombineNoChecks(Directory, FileName);
     }
 }

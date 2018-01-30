@@ -216,21 +216,21 @@ namespace System.IO
             string path,
             string searchPattern,
             SearchTarget searchTarget,
-            EnumerationOptions enumerationOptions)
+            EnumerationOptions options)
         {
             Debug.Assert(path != null);
             Debug.Assert(searchPattern != null);
 
-            FileSystemEnumerableFactory.NormalizeInputs(ref path, ref searchPattern);
+            FileSystemEnumerableFactory.NormalizeInputs(ref path, ref searchPattern, options);
 
             switch (searchTarget)
             {
                 case SearchTarget.Directories:
-                    return FileSystemEnumerableFactory.DirectoryInfos(path, searchPattern, enumerationOptions);
+                    return FileSystemEnumerableFactory.DirectoryInfos(path, searchPattern, options);
                 case SearchTarget.Files:
-                    return FileSystemEnumerableFactory.FileInfos(path, searchPattern, enumerationOptions);
+                    return FileSystemEnumerableFactory.FileInfos(path, searchPattern, options);
                 case SearchTarget.Both:
-                    return FileSystemEnumerableFactory.FileSystemInfos(path, searchPattern, enumerationOptions);
+                    return FileSystemEnumerableFactory.FileSystemInfos(path, searchPattern, options);
                 default:
                     throw new ArgumentException(SR.ArgumentOutOfRange_Enum, nameof(searchTarget));
             }

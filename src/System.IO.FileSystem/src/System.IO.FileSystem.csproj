@@ -21,6 +21,7 @@
     <Compile Include="System\IO\CharSpanExtensions.cs" />
     <Compile Include="System\IO\Enumeration\FileSystemEnumerable.cs" />
     <Compile Include="System\IO\Enumeration\FileSystemName.cs" />
+    <Compile Include="System\IO\Enumeration\MatchType.cs" />
     <Compile Include="System\IO\Error.cs" />
     <Compile Include="System\IO\Directory.cs" />
     <Compile Include="System\IO\DirectoryInfo.cs" />

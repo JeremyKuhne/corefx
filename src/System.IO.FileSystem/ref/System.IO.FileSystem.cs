@@ -226,16 +226,21 @@ namespace System.IO
 }
 namespace System.IO.Enumeration
 {
+    public enum MatchType
+    {
+        Simple,
+        Dos
+    }
     public struct EnumerationOptions
     {
         public static EnumerationOptions Default { get { throw null;  } }
 
         public bool Recurse { get { throw null; } set { } }
         public bool IgnoreInaccessible { get { throw null; } set { } }
-        public int MinimumBufferSize { get { throw null; } set { } }
+        public int BufferSize { get { throw null; } set { } }
         public FileAttributes AttributesToSkip { get { throw null; } set { } }
+        public MatchType MatchType { get { throw null; } set { } }
     }
-
     public ref struct FileSystemEntry
     {
         public ReadOnlySpan<char> Directory { get { throw null; } }
@@ -253,16 +258,17 @@ namespace System.IO.Enumeration
         public DirectoryInfo ToDirectoryInfo() { throw null; }
         public FileInfo ToFileInfo() { throw null; }
         public FileSystemInfo ToFileSystemInfo() { throw null; }
-        public string ToUserFullPath() { throw null; }
+        public string ToSpecifiedFullPath() { throw null; }
+        public string ToFullPath() { throw null; }
     }
     public class FileSystemEnumerator<TResult> : Runtime.ConstrainedExecution.CriticalFinalizerObject, Collections.Generic.IEnumerator<TResult>
     {
         public FileSystemEnumerator(string directory) { }
         public FileSystemEnumerator(string directory, EnumerationOptions options) { }
 
-        protected virtual bool ShouldIncludeEntry(ref FileSystemEntry entry) { throw null; }
-        protected virtual bool ShouldRecurseIntoEntry(ref FileSystemEntry entry) { throw null; }
-        protected virtual TResult TransformEntry(ref FileSystemEntry entry) { throw null; }
+        protected virtual bool ShouldIncludeEntry(in FileSystemEntry entry) { throw null; }
+        protected virtual bool ShouldRecurseIntoEntry(in FileSystemEntry entry) { throw null; }
+        protected virtual TResult TransformEntry(in FileSystemEntry entry) { throw null; }
         protected virtual void OnDirectoryFinished(ReadOnlySpan<char> directory) { throw null; }
 
         public TResult Current { get { throw null; } }
@@ -282,13 +288,13 @@ namespace System.IO.Enumeration
         public Collections.Generic.IEnumerator<TResult> GetEnumerator() { throw null; }
         Collections.IEnumerator Collections.IEnumerable.GetEnumerator() { throw null; }
 
-        public delegate bool FindPredicate(ref System.IO.Enumeration.FileSystemEntry entry, TState state);
-        public delegate TResult FindTransform(ref System.IO.Enumeration.FileSystemEntry entry, TState state);
+        public delegate bool FindPredicate(in System.IO.Enumeration.FileSystemEntry entry, TState state);
+        public delegate TResult FindTransform(in System.IO.Enumeration.FileSystemEntry entry, TState state);
     }
     public static class FileSystemName
     {
         public static string TranslateDosExpression(string expression) { throw null; }
-        public static bool MatchDosPattern(string expression, ReadOnlySpan<char> name, bool ignoreCase = true) { throw null; }
-        public static bool MatchSimplePattern(string expression, ReadOnlySpan<char> name, bool ignoreCase = true) { throw null; }
+        public static bool MatchesDosExpression(string expression, ReadOnlySpan<char> name, bool ignoreCase = true) { throw null; }
+        public static bool MatchesSimpleExpression(string expression, ReadOnlySpan<char> name, bool ignoreCase = true) { throw null; }
     }
 }

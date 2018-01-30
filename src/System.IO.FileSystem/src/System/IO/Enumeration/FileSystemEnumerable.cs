@@ -50,12 +50,12 @@ namespace System.IO.Enumeration
         /// <summary>
         /// Delegate for filtering out find results.
         /// </summary>
-        public delegate bool FindPredicate(ref FileSystemEntry entry, TState state);
+        public delegate bool FindPredicate(in FileSystemEntry entry, TState state);
 
         /// <summary>
         /// Delegate for transforming raw find data into a result.
         /// </summary>
-        public delegate TResult FindTransform(ref FileSystemEntry entry, TState state);
+        public delegate TResult FindTransform(in FileSystemEntry entry, TState state);
 
         private class DelegateEnumerator : FileSystemEnumerator<TResult>
         {
@@ -67,10 +67,10 @@ namespace System.IO.Enumeration
                 _enumerable = enumerable;
             }
 
-            protected override bool ShouldIncludeEntry(ref FileSystemEntry entry) => _enumerable._shouldInclude(ref entry, _enumerable.State);
-            protected override TResult TransformEntry(ref FileSystemEntry entry) => _enumerable._transform(ref entry, _enumerable.State);
-            protected override bool ShouldRecurseIntoEntry(ref FileSystemEntry entry)
-                => _enumerable.ShouldRecursePredicate?.Invoke(ref entry, _enumerable.State) ?? true;
+            protected override bool ShouldIncludeEntry(in FileSystemEntry entry) => _enumerable._shouldInclude(in entry, _enumerable.State);
+            protected override TResult TransformEntry(in FileSystemEntry entry) => _enumerable._transform(in entry, _enumerable.State);
+            protected override bool ShouldRecurseIntoEntry(in FileSystemEntry entry)
+                => _enumerable.ShouldRecursePredicate?.Invoke(in entry, _enumerable.State) ?? true;
         }
     }
 }

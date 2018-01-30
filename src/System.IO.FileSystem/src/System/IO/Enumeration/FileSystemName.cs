@@ -85,7 +85,7 @@ namespace System.IO.Enumeration
         /// Like PatternMatcher, matching will not line up with Win32 behavior unless you transform the expression
         /// using <see cref="TranslateDosExpression(string)"/>
         /// </remarks>
-        public static bool MatchDosPattern(string expression, ReadOnlySpan<char> name, bool ignoreCase = true)
+        public static bool MatchesDosExpression(string expression, ReadOnlySpan<char> name, bool ignoreCase = true)
         {
             return MatchPattern(expression, name, ignoreCase, useExtendedWildcards: true);
         }
@@ -93,7 +93,7 @@ namespace System.IO.Enumeration
         /// <summary>
         /// Return true if the given expression matches the given name. '*' and '?' are wildcards, '\' escapes.
         /// </summary>
-        public static bool MatchSimplePattern(string expression, ReadOnlySpan<char> name, bool ignoreCase = true)
+        public static bool MatchesSimpleExpression(string expression, ReadOnlySpan<char> name, bool ignoreCase = true)
         {
             return MatchPattern(expression, name, ignoreCase, useExtendedWildcards: false);
         }

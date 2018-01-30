@@ -15,7 +15,7 @@ namespace System.IO.Enumeration
         public static EnumerationOptions Default => default;
 
         /// <summary>
-        /// Enumerate subdirectories
+        /// Should we recurse into subdirectories while enumerating?
         /// </summary>
         public bool Recurse { get; set; }
 
@@ -25,13 +25,28 @@ namespace System.IO.Enumeration
         public bool IgnoreInaccessible { get; set; }
 
         /// <summary>
-        /// Use a buffer of at least the specified size.
+        /// Suggested buffer size.
         /// </summary>
-        public int MinimumBufferSize { get; set; }
+        /// <remarks>
+        /// Not all platforms use user allocated buffers, and some require either fixed buffers or a
+        /// buffer that has enough space to return a full result. One scenario where this option is
+        /// useful is with remote share enumeration on Windows. Having a large buffer may result in
+        /// better performance as more results can be batched over the wire.
+        /// </remarks>
+        public int BufferSize { get; set; }
 
         /// <summary>
         /// Skip entries with the given attributes.
         /// </summary>
         public FileAttributes AttributesToSkip { get; set; }
+
+        /// <summary>
+        /// For APIs that allow specifying a match expression this will allow you to specify how
+        /// to interpret the match expression.
+        /// </summary>
+        /// <remarks>
+        /// The default is simple matching where '*' is always 0 or more characters and '?' is a single character.
+        /// </remarks>
+        public MatchType MatchType { get; set; }
     }
 }

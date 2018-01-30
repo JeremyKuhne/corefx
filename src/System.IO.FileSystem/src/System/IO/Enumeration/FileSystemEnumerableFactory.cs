@@ -6,7 +6,7 @@ namespace System.IO.Enumeration
 {
     internal static class FileSystemEnumerableFactory
     {
-        internal static void NormalizeInputs(ref string directory, ref string expression)
+        internal static void NormalizeInputs(ref string directory, ref string expression, EnumerationOptions options)
         {
             if (PathHelpers.IsPathRooted(expression))
                 throw new ArgumentException(SR.Arg_Path2IsRooted, nameof(expression));
@@ -27,9 +27,24 @@ namespace System.IO.Enumeration
                 expression = expression.Substring(directoryName.Length + 1);
             }
 
-            // Historically we always treated "." as "*"
-            if (string.IsNullOrEmpty(expression) || expression == "." || expression == "*.*")
-                expression = "*";
+            switch (options.MatchType)
+            {
+                case MatchType.Dos:
+                    // Historically we always treated "." as "*"
+                    if (string.IsNullOrEmpty(expression) || expression == "." || expression == "*.*")
+                    {
+                        expression = "*";
+                    }
+                    else
+                    {
+                        expression = FileSystemName.TranslateDosExpression(expression);
+                    }
+                    break;
+                case MatchType.Simple:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(options));
+            }
         }
 
         internal static FileSystemEnumerable<string, string> UserFiles(string directory,
@@ -38,53 +53,66 @@ namespace System.IO.Enumeration
         {
             return new FileSystemEnumerable<string, string>(
                 directory,
-                (ref FileSystemEntry findData, string state) => findData.ToUserFullPath(),
-                (ref FileSystemEntry findData, string state) =>
+                (in FileSystemEntry entry, string state) => entry.ToSpecifiedFullPath(),
+                (in FileSystemEntry entry, string state) =>
                 {
-                    return !findData.IsNameDotOrDotDot
-                        && !findData.IsDirectory
-                        && FileSystemName.MatchDosPattern(state, findData.FileName, ignoreCase: true);
+                    return !entry.IsNameDotOrDotDot
+                        && !entry.IsDirectory
+                        && FileSystemName.MatchesDosExpression(state, entry.FileName, ignoreCase: true);
                 },
                 options)
             {
-                State = FileSystemName.TranslateDosExpression(expression),
+                State = expression,
             };
         }
 
-        internal static FileSystemEnumerable<string, string> UserDirectories(string directory,
+        private static bool MatchesPattern(string expression, ReadOnlySpan<char> name, EnumerationOptions options)
+        {
+            switch (options.MatchType)
+            {
+                case MatchType.Simple:
+                    return FileSystemName.MatchesSimpleExpression(expression, name, ignoreCase: true);
+                case MatchType.Dos:
+                    return FileSystemName.MatchesDosExpression(expression, name, ignoreCase: true);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(options));
+            }
+        }
+
+        internal static FileSystemEnumerable<string, (string, EnumerationOptions)> UserDirectories(string directory,
             string expression,
             EnumerationOptions options)
         {
-            return new FileSystemEnumerable<string, string>(
+            return new FileSystemEnumerable<string, (string, EnumerationOptions)>(
                 directory,
-                (ref FileSystemEntry findData, string state) => findData.ToUserFullPath(),
-                (ref FileSystemEntry findData, string state) =>
+                (in FileSystemEntry entry, (string, EnumerationOptions) state) => entry.ToSpecifiedFullPath(),
+                (in FileSystemEntry entry, (string expression, EnumerationOptions options) state) =>
                 {
-                    return !findData.IsNameDotOrDotDot
-                        && findData.IsDirectory
-                        && FileSystemName.MatchDosPattern(state, findData.FileName, ignoreCase: true);
+                    return !entry.IsNameDotOrDotDot
+                        && entry.IsDirectory
+                        && MatchesPattern(expression, entry.FileName, options);
                 },
                 options)
             {
-                State = FileSystemName.TranslateDosExpression(expression),
+                State = (expression, options),
             };
         }
 
-        internal static FileSystemEnumerable<string, string> UserEntries(string directory,
+        internal static FileSystemEnumerable<string, (string, EnumerationOptions)> UserEntries(string directory,
             string expression,
             EnumerationOptions options)
         {
-            return new FileSystemEnumerable<string, string>(
+            return new FileSystemEnumerable<string, (string, EnumerationOptions)>(
                 directory,
-                (ref FileSystemEntry findData, string state) => findData.ToUserFullPath(),
-                (ref FileSystemEntry findData, string state) =>
+                (in FileSystemEntry entry, (string, EnumerationOptions) state) => entry.ToSpecifiedFullPath(),
+                (in FileSystemEntry entry, (string expression, EnumerationOptions options) state) =>
                 {
-                    return !findData.IsNameDotOrDotDot
-                        && FileSystemName.MatchDosPattern(state, findData.FileName, ignoreCase: true);
+                    return !entry.IsNameDotOrDotDot
+                        && MatchesPattern(expression, entry.FileName, options);
                 },
                 options)
             {
-                State = FileSystemName.TranslateDosExpression(expression),
+                State = (expression, options),
             };
         }
 
@@ -95,12 +123,12 @@ namespace System.IO.Enumeration
         {
              return new FileSystemEnumerable<FileInfo, string>(
                 directory,
-                (ref FileSystemEntry findData, string state) => findData.ToFileInfo(),
-                (ref FileSystemEntry findData, string state) =>
+                (in FileSystemEntry entry, string state) => entry.ToFileInfo(),
+                (in FileSystemEntry entry, string state) =>
                 {
-                    return !findData.IsNameDotOrDotDot
-                        && !findData.IsDirectory
-                        && FileSystemName.MatchDosPattern(state, findData.FileName, ignoreCase: true);
+                    return !entry.IsNameDotOrDotDot
+                        && !entry.IsDirectory
+                        && FileSystemName.MatchesDosExpression(state, entry.FileName, ignoreCase: true);
                 },
                 options)
              {
@@ -115,12 +143,12 @@ namespace System.IO.Enumeration
         {
             return new FileSystemEnumerable<DirectoryInfo, string>(
                directory,
-               (ref FileSystemEntry findData, string state) => findData.ToDirectoryInfo(),
-               (ref FileSystemEntry findData, string state) =>
+               (in FileSystemEntry entry, string state) => entry.ToDirectoryInfo(),
+               (in FileSystemEntry entry, string state) =>
                {
-                   return !findData.IsNameDotOrDotDot
-                       && findData.IsDirectory
-                       && FileSystemName.MatchDosPattern(state, findData.FileName, ignoreCase: true);
+                   return !entry.IsNameDotOrDotDot
+                       && entry.IsDirectory
+                       && FileSystemName.MatchesDosExpression(state, entry.FileName, ignoreCase: true);
                },
                options)
             {
@@ -135,11 +163,11 @@ namespace System.IO.Enumeration
         {
             return new FileSystemEnumerable<FileSystemInfo, string>(
                directory,
-               (ref FileSystemEntry findData, string state) => findData.ToFileSystemInfo(),
-               (ref FileSystemEntry findData, string state) =>
+               (in FileSystemEntry entry, string state) => entry.ToFileSystemInfo(),
+               (in FileSystemEntry entry, string state) =>
                {
-                   return !findData.IsNameDotOrDotDot
-                       && FileSystemName.MatchDosPattern(state, findData.FileName, ignoreCase: true);
+                   return !entry.IsNameDotOrDotDot
+                       && FileSystemName.MatchesDosExpression(state, entry.FileName, ignoreCase: true);
                },
                options)
             {
