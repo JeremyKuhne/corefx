@@ -39,9 +39,8 @@ namespace System.IO.Enumeration
                     int error = (int)Interop.NtDll.RtlNtStatusToDosError(status);
 
                     // Note that there are many NT status codes that convert to ERROR_ACCESS_DENIED.
-                    if (error == Interop.Errors.ERROR_ACCESS_DENIED && _options.IgnoreInaccessible)
+                    if (ContinueOnError(error) || (error == Interop.Errors.ERROR_ACCESS_DENIED && _options.IgnoreInaccessible))
                     {
-                        // User wanted to skip on access denied.
                         DirectoryFinished();
                         return false;
                     }

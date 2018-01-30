@@ -13,14 +13,14 @@ namespace System.IO.Tests.FileEnumerable
         public void NullTransformThrows()
         {
             AssertExtensions.Throws<ArgumentNullException>("transform",
-                () => new FileSystemEnumerable<string, string>(TestDirectory, transform: null, shouldIncludePredicate: (in FileSystemEntry entry, string state) => true));
+                () => new FileSystemEnumerable<string, string>(TestDirectory, transform: null, shouldIncludePredicate: (ref FileSystemEntry entry, string state) => true));
         }
 
         [Fact]
         public void NullPredicateThrows()
         {
             AssertExtensions.Throws<ArgumentNullException>("shouldIncludePredicate",
-                () => new FileSystemEnumerable<string, string>(TestDirectory, transform: (in FileSystemEntry entry, string state) => string.Empty, shouldIncludePredicate: null));
+                () => new FileSystemEnumerable<string, string>(TestDirectory, transform: (ref FileSystemEntry entry, string state) => string.Empty, shouldIncludePredicate: null));
         }
     }
 }

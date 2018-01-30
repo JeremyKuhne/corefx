@@ -7,6 +7,23 @@ namespace System.IO.Enumeration
     public struct EnumerationOptions
     {
         /// <summary>
+        /// For internal use. These are the options we want to use if calling the existing Directory/File APIs where you don't
+        /// explicitly specify EnumerationOptions.
+        /// </summary>
+        internal static EnumerationOptions Compatible => new EnumerationOptions { MatchType = MatchType.Dos };
+
+        /// <summary>
+        /// Converts SearchOptions to FindOptions. Throws if undefined SearchOption.
+        /// </summary>
+        internal static EnumerationOptions FromSearchOption(SearchOption searchOption)
+        {
+            if ((searchOption != SearchOption.TopDirectoryOnly) && (searchOption != SearchOption.AllDirectories))
+                throw new ArgumentOutOfRangeException(nameof(searchOption), SR.ArgumentOutOfRange_Enum);
+
+            return searchOption == SearchOption.AllDirectories ? new EnumerationOptions { Recurse = true, MatchType = MatchType.Dos } : Compatible;
+        }
+
+        /// <summary>
         /// Create an enumeration options struct with the default options.
         /// </summary>
         /// <remarks>

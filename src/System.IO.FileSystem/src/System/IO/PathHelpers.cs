@@ -189,16 +189,5 @@ namespace System.IO
 
             return ReadOnlySpan<char>.Empty;
         }
-
-        /// <summary>
-        /// Converts SearchOptions to FindOptions. Throws if undefined SearchOption.
-        /// </summary>
-        internal static EnumerationOptions GetEnumerationOptions(SearchOption searchOption)
-        {
-            if ((searchOption != SearchOption.TopDirectoryOnly) && (searchOption != SearchOption.AllDirectories))
-                throw new ArgumentOutOfRangeException(nameof(searchOption), SR.ArgumentOutOfRange_Enum);
-
-            return searchOption == SearchOption.AllDirectories ? new EnumerationOptions { Recurse = true } : EnumerationOptions.Default;
-        }
     }
 }

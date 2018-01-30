@@ -261,15 +261,16 @@ namespace System.IO.Enumeration
         public string ToSpecifiedFullPath() { throw null; }
         public string ToFullPath() { throw null; }
     }
-    public class FileSystemEnumerator<TResult> : Runtime.ConstrainedExecution.CriticalFinalizerObject, Collections.Generic.IEnumerator<TResult>
+    public abstract class FileSystemEnumerator<TResult> : Runtime.ConstrainedExecution.CriticalFinalizerObject, Collections.Generic.IEnumerator<TResult>
     {
         public FileSystemEnumerator(string directory) { }
         public FileSystemEnumerator(string directory, EnumerationOptions options) { }
 
-        protected virtual bool ShouldIncludeEntry(in FileSystemEntry entry) { throw null; }
-        protected virtual bool ShouldRecurseIntoEntry(in FileSystemEntry entry) { throw null; }
-        protected virtual TResult TransformEntry(in FileSystemEntry entry) { throw null; }
+        protected virtual bool ShouldIncludeEntry(ref FileSystemEntry entry) { throw null; }
+        protected virtual bool ShouldRecurseIntoEntry(ref FileSystemEntry entry) { throw null; }
+        protected abstract TResult TransformEntry(ref FileSystemEntry entry);
         protected virtual void OnDirectoryFinished(ReadOnlySpan<char> directory) { throw null; }
+        protected virtual bool ContinueOnError(int error) { throw null; }
 
         public TResult Current { get { throw null; } }
         object System.Collections.IEnumerator.Current { get { throw null; } }
@@ -288,8 +289,8 @@ namespace System.IO.Enumeration
         public Collections.Generic.IEnumerator<TResult> GetEnumerator() { throw null; }
         Collections.IEnumerator Collections.IEnumerable.GetEnumerator() { throw null; }
 
-        public delegate bool FindPredicate(in System.IO.Enumeration.FileSystemEntry entry, TState state);
-        public delegate TResult FindTransform(in System.IO.Enumeration.FileSystemEntry entry, TState state);
+        public delegate bool FindPredicate(ref System.IO.Enumeration.FileSystemEntry entry, TState state);
+        public delegate TResult FindTransform(ref System.IO.Enumeration.FileSystemEntry entry, TState state);
     }
     public static class FileSystemName
     {

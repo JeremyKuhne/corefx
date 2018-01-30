@@ -31,7 +31,8 @@ namespace System.IO.Enumeration
                         }
                 }
 
-                throw Win32Marshal.GetExceptionForWin32Error(error, _currentPath);
+                if (!ContinueOnError(error))
+                    throw Win32Marshal.GetExceptionForWin32Error(error, _currentPath);
             }
 
             return true;

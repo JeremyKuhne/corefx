@@ -149,12 +149,12 @@ namespace System.IO
             return File.GetLastAccessTimeUtc(path);
         }
 
-        public static string[] GetFiles(string path) => GetFiles(path, "*", enumerationOptions: EnumerationOptions.Default);
+        public static string[] GetFiles(string path) => GetFiles(path, "*", enumerationOptions: EnumerationOptions.Compatible);
 
-        public static string[] GetFiles(string path, string searchPattern) => GetFiles(path, searchPattern, enumerationOptions: EnumerationOptions.Default);
+        public static string[] GetFiles(string path, string searchPattern) => GetFiles(path, searchPattern, enumerationOptions: EnumerationOptions.Compatible);
 
         public static string[] GetFiles(string path, string searchPattern, SearchOption searchOption)
-            => GetFiles(path, searchPattern, PathHelpers.GetEnumerationOptions(searchOption));
+            => GetFiles(path, searchPattern, EnumerationOptions.FromSearchOption(searchOption));
 
         public static string[] GetFiles(string path, string searchPattern, EnumerationOptions enumerationOptions)
         {
@@ -165,12 +165,12 @@ namespace System.IO
             return EnumerableHelpers.ToArray(InternalEnumeratePaths(path, searchPattern, SearchTarget.Files, enumerationOptions));
         }
 
-        public static string[] GetDirectories(string path) => GetDirectories(path, "*", enumerationOptions: EnumerationOptions.Default);
+        public static string[] GetDirectories(string path) => GetDirectories(path, "*", enumerationOptions: EnumerationOptions.Compatible);
 
-        public static string[] GetDirectories(string path, string searchPattern) => GetDirectories(path, searchPattern, enumerationOptions: EnumerationOptions.Default);
+        public static string[] GetDirectories(string path, string searchPattern) => GetDirectories(path, searchPattern, enumerationOptions: EnumerationOptions.Compatible);
 
         public static string[] GetDirectories(string path, string searchPattern, SearchOption searchOption)
-            => GetDirectories(path, searchPattern, PathHelpers.GetEnumerationOptions(searchOption));
+            => GetDirectories(path, searchPattern, EnumerationOptions.FromSearchOption(searchOption));
 
         public static string[] GetDirectories(string path, string searchPattern, EnumerationOptions enumerationOptions)
         {
@@ -181,12 +181,12 @@ namespace System.IO
             return EnumerableHelpers.ToArray(InternalEnumeratePaths(path, searchPattern, SearchTarget.Directories, enumerationOptions));
         }
 
-        public static string[] GetFileSystemEntries(string path) => GetFileSystemEntries(path, "*", enumerationOptions: EnumerationOptions.Default);
+        public static string[] GetFileSystemEntries(string path) => GetFileSystemEntries(path, "*", enumerationOptions: EnumerationOptions.Compatible);
 
-        public static string[] GetFileSystemEntries(string path, string searchPattern) => GetFileSystemEntries(path, searchPattern, enumerationOptions: EnumerationOptions.Default);
+        public static string[] GetFileSystemEntries(string path, string searchPattern) => GetFileSystemEntries(path, searchPattern, enumerationOptions: EnumerationOptions.Compatible);
 
         public static string[] GetFileSystemEntries(string path, string searchPattern, SearchOption searchOption)
-            => GetFileSystemEntries(path, searchPattern, PathHelpers.GetEnumerationOptions(searchOption));
+            => GetFileSystemEntries(path, searchPattern, EnumerationOptions.FromSearchOption(searchOption));
 
         public static string[] GetFileSystemEntries(string path, string searchPattern, EnumerationOptions enumerationOptions)
         {
@@ -221,12 +221,12 @@ namespace System.IO
             }
         }
 
-        public static IEnumerable<string> EnumerateDirectories(string path) => EnumerateDirectories(path, "*", enumerationOptions: EnumerationOptions.Default);
+        public static IEnumerable<string> EnumerateDirectories(string path) => EnumerateDirectories(path, "*", enumerationOptions: EnumerationOptions.Compatible);
 
-        public static IEnumerable<string> EnumerateDirectories(string path, string searchPattern) => EnumerateDirectories(path, searchPattern, enumerationOptions: EnumerationOptions.Default);
+        public static IEnumerable<string> EnumerateDirectories(string path, string searchPattern) => EnumerateDirectories(path, searchPattern, enumerationOptions: EnumerationOptions.Compatible);
 
         public static IEnumerable<string> EnumerateDirectories(string path, string searchPattern, SearchOption searchOption)
-            => EnumerateDirectories(path, searchPattern, PathHelpers.GetEnumerationOptions(searchOption));
+            => EnumerateDirectories(path, searchPattern, EnumerationOptions.FromSearchOption(searchOption));
 
         public static IEnumerable<string> EnumerateDirectories(string path, string searchPattern, EnumerationOptions enumerationOptions)
         {
@@ -237,12 +237,12 @@ namespace System.IO
             return InternalEnumeratePaths(path, searchPattern, SearchTarget.Directories, enumerationOptions);
         }
 
-        public static IEnumerable<string> EnumerateFiles(string path) => EnumerateFiles(path, "*", enumerationOptions: EnumerationOptions.Default);
+        public static IEnumerable<string> EnumerateFiles(string path) => EnumerateFiles(path, "*", enumerationOptions: EnumerationOptions.Compatible);
 
-        public static IEnumerable<string> EnumerateFiles(string path, string searchPattern) => EnumerateFiles(path, searchPattern, enumerationOptions: EnumerationOptions.Default);
+        public static IEnumerable<string> EnumerateFiles(string path, string searchPattern) => EnumerateFiles(path, searchPattern, enumerationOptions: EnumerationOptions.Compatible);
 
         public static IEnumerable<string> EnumerateFiles(string path, string searchPattern, SearchOption searchOption)
-            => EnumerateFiles(path, searchPattern, PathHelpers.GetEnumerationOptions(searchOption));
+            => EnumerateFiles(path, searchPattern, EnumerationOptions.FromSearchOption(searchOption));
 
         public static IEnumerable<string> EnumerateFiles(string path, string searchPattern, EnumerationOptions enumerationOptions)
         {
@@ -253,12 +253,12 @@ namespace System.IO
             return InternalEnumeratePaths(path, searchPattern, SearchTarget.Files, enumerationOptions);
         }
 
-        public static IEnumerable<string> EnumerateFileSystemEntries(string path) => EnumerateFileSystemEntries(path, "*", enumerationOptions: EnumerationOptions.Default);
+        public static IEnumerable<string> EnumerateFileSystemEntries(string path) => EnumerateFileSystemEntries(path, "*", enumerationOptions: EnumerationOptions.Compatible);
 
-        public static IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern) => EnumerateFileSystemEntries(path, searchPattern, enumerationOptions: EnumerationOptions.Default);
+        public static IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern) => EnumerateFileSystemEntries(path, searchPattern, enumerationOptions: EnumerationOptions.Compatible);
 
         public static IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern, SearchOption searchOption)
-            => EnumerateFileSystemEntries(path, searchPattern, PathHelpers.GetEnumerationOptions(searchOption));
+            => EnumerateFileSystemEntries(path, searchPattern, EnumerationOptions.FromSearchOption(searchOption));
 
         public static IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern, EnumerationOptions enumerationOptions)
         {

@@ -12,7 +12,7 @@ using System.Threading;
 
 namespace System.IO.Enumeration
 {
-    public unsafe partial class FileSystemEnumerator<TResult> : CriticalFinalizerObject, IEnumerator<TResult>
+    public unsafe abstract partial class FileSystemEnumerator<TResult> : CriticalFinalizerObject, IEnumerator<TResult>
     {
         private const int StandardBufferSize = 4096;
 
@@ -91,11 +91,33 @@ namespace System.IO.Enumeration
                 Interop.Kernel32.CloseHandle(handle);
         }
 
+        /// <summary>
+        /// Return true if the given file system entry should be included in the results.
+        /// </summary>
+        protected virtual bool ShouldIncludeEntry(ref FileSystemEntry entry) => true;
 
-        protected virtual bool ShouldIncludeEntry(in FileSystemEntry entry) => true;
-        protected virtual bool ShouldRecurseIntoEntry(in FileSystemEntry entry) => true;
-        protected virtual TResult TransformEntry(in FileSystemEntry entry) => default;
+        /// <summary>
+        /// Return true if the directory entry given should be recursed into.
+        /// </summary>
+        protected virtual bool ShouldRecurseIntoEntry(ref FileSystemEntry entry) => true;
+
+        /// <summary>
+        /// Generate the result type from the current entry;
+        /// </summary>
+        protected abstract TResult TransformEntry(ref FileSystemEntry entry);
+
+        /// <summary>
+        /// Called whenever the end of a directory is reached.
+        /// </summary>
+        /// <param name="directory">The path of the directory that finished.</param>
         protected virtual void OnDirectoryFinished(ReadOnlySpan<char> directory) { }
+
+        /// <summary>
+        /// Called when a native API returns an error. Return true to continue, or false
+        /// to throw the default exception for the given error.
+        /// </summary>
+        /// <param name="error">The native error code.</param>
+        protected virtual bool ContinueOnError(int error) => false;
 
         /// <summary>
         /// Simple wrapper to allow creating a file handle for an existing directory.
@@ -113,6 +135,9 @@ namespace System.IO.Enumeration
             {
                 // Historically we throw directory not found rather than file not found
                 int error = Marshal.GetLastWin32Error();
+                if (ContinueOnError(error))
+                    return IntPtr.Zero;
+
                 switch (error)
                 {
                     case Interop.Errors.ERROR_ACCESS_DENIED:
@@ -149,7 +174,7 @@ namespace System.IO.Enumeration
                 if (_lastEntryFound)
                     return false;
 
-                FileSystemEntry findData = default;
+                FileSystemEntry entry = default;
                 do
                 {
                     FindNextFile();
@@ -159,7 +184,7 @@ namespace System.IO.Enumeration
                         if (_options.Recurse && (_info->FileAttributes & FileAttributes.Directory) != 0
                             && !PathHelpers.IsDotOrDotDot(_info->FileName)
                             && (_info->FileAttributes & _options.AttributesToSkip) == 0
-                            && ShouldRecurseIntoEntry(in findData))
+                            && ShouldRecurseIntoEntry(ref entry))
                         {
                             string subDirectory = PathHelpers.CombineNoChecks(_currentPath, _info->FileName);
                             IntPtr subDirectoryHandle = CreateDirectoryHandle(subDirectory);
@@ -179,12 +204,12 @@ namespace System.IO.Enumeration
                             }
                         }
 
-                        findData = new FileSystemEntry(_info, _currentPath, _originalFullPath, OriginalPath);
+                        entry = new FileSystemEntry(_info, _currentPath, _originalFullPath, OriginalPath);
                     }
-                } while (!_lastEntryFound && ((_info->FileAttributes & _options.AttributesToSkip) != 0 || !ShouldIncludeEntry(in findData)));
+                } while (!_lastEntryFound && ((_info->FileAttributes & _options.AttributesToSkip) != 0 || !ShouldIncludeEntry(ref entry)));
 
                 if (!_lastEntryFound)
-                    _current = TransformEntry(in findData);
+                    _current = TransformEntry(ref entry);
 
                 return !_lastEntryFound;
             }
