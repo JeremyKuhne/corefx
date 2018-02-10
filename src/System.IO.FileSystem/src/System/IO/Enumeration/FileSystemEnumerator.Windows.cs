@@ -4,7 +4,6 @@
 
 using System.Buffers;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -32,7 +31,7 @@ namespace System.IO.Enumeration
         private IntPtr _directoryHandle;
         private string _currentPath;
         private bool _lastEntryFound;
-        private Queue<(IntPtr Handle, string Path)> _pending;
+        private Queue<string> _pending;
         private GCHandle _pinnedBuffer;
 
         /// <summary>
@@ -156,23 +155,9 @@ namespace System.IO.Enumeration
                         else if (_options.RecurseSubdirectories && ShouldRecurseIntoEntry(ref entry))
                         {
                             // Recursion is on and the directory was accepted, Queue it
-                            string subDirectory = PathHelpers.CombineNoChecks(_currentPath, _entry->FileName);
-                            IntPtr subDirectoryHandle = CreateDirectoryHandle(subDirectory);
-                            if (subDirectoryHandle != IntPtr.Zero)
-                            {
-                                try
-                                {
-                                    if (_pending == null)
-                                        _pending = new Queue<(IntPtr, string)>();
-                                    _pending.Enqueue((subDirectoryHandle, subDirectory));
-                                }
-                                catch
-                                {
-                                    // Couldn't queue the handle, close it and rethrow
-                                    Interop.Kernel32.CloseHandle(subDirectoryHandle);
-                                    throw;
-                                }
-                            }
+                            if (_pending == null)
+                                _pending = new Queue<string>();
+                            _pending.Enqueue(PathHelpers.CombineNoChecks(_currentPath, _entry->FileName));
                         }
                     }
 
@@ -196,11 +181,6 @@ namespace System.IO.Enumeration
                 _entry = (Interop.NtDll.FILE_FULL_DIR_INFORMATION*)_pinnedBuffer.AddrOfPinnedObject();
         }
 
-        private void DequeueNextDirectory()
-        {
-            (_directoryHandle, _currentPath) = _pending.Dequeue();
-        }
-
         private void InternalDispose(bool disposing)
         {
             // It is possible to fail to allocate the lock, but the finalizer will still run
@@ -209,15 +189,9 @@ namespace System.IO.Enumeration
                 lock (_lock)
                 {
                     _lastEntryFound = true;
+                    _pending = null;
 
                     CloseDirectoryHandle();
-
-                    if (_pending != null)
-                    {
-                        while (_pending.Count > 0)
-                            Interop.Kernel32.CloseHandle(_pending.Dequeue().Handle);
-                        _pending = null;
-                    }
 
                     if (_pinnedBuffer.IsAllocated)
                         _pinnedBuffer.Free();

@@ -57,7 +57,8 @@ namespace System.IO.Enumeration
             else
             {
                 // Grab the next directory to parse
-                DequeueNextDirectory();
+                _currentPath = _pending.Dequeue();
+                _directoryHandle = CreateDirectoryHandle(_currentPath);
                 FindNextEntry();
             }
         }

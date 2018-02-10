@@ -183,12 +183,6 @@ namespace System.IO.Enumeration
             }
         }
 
-        private void DequeueNextDirectory()
-        {
-            _currentPath = _pending.Dequeue();
-            _directoryHandle = CreateDirectoryHandle(_currentPath);
-        }
-
         private static bool IsAccessError(int error)
             => error == (int)Interop.Error.EACCES || error == (int)Interop.Error.EBADF
                 || error == (int)Interop.Error.EPERM;
