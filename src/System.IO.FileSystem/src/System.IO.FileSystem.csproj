@@ -19,6 +19,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
+    <Compile Include="System\IO\BufferMemory.cs" />
     <Compile Include="System\IO\CharSpanExtensions.cs" />
     <Compile Include="System\IO\Enumeration\FileSystemEnumerable.cs" />
     <Compile Include="System\IO\Enumeration\FileSystemEnumerableFactory.cs" />

@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace System.IO
@@ -84,7 +83,20 @@ namespace System.IO
             return CombineNoChecksInternal(first, second, third);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal unsafe static void CombineInto(ReadOnlySpan<char> first, ReadOnlySpan<char> second, ref BufferMemory<char> buffer)
+        {
+            bool hasSeparator = PathInternal.IsDirectorySeparator(first[first.Length - 1])
+                || PathInternal.IsDirectorySeparator(second[0]);
+
+            int length = first.Length + second.Length + (hasSeparator ? 0 : 1);
+            buffer.EnsureCapacity(length);
+            first.CopyTo(buffer);
+            if (!hasSeparator)
+                buffer[first.Length] = Path.DirectorySeparatorChar;
+            second.CopyTo(buffer.Slice(first.Length + (hasSeparator ? 0 : 1)));
+            buffer.SetSegment(0, length);
+        }
+
         private unsafe static string CombineNoChecksInternal(ReadOnlySpan<char> first, ReadOnlySpan<char> second)
         {
             Debug.Assert(first.Length > 0 && second.Length > 0, "should have dealt with empty paths");
@@ -107,7 +119,6 @@ namespace System.IO
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private unsafe static string CombineNoChecksInternal(ReadOnlySpan<char> first, ReadOnlySpan<char> second, ReadOnlySpan<char> third)
         {
             Debug.Assert(first.Length > 0 && second.Length > 0 && third.Length > 0, "should have dealt with empty paths");

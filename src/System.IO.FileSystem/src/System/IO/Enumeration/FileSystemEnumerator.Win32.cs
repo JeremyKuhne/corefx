@@ -45,11 +45,11 @@ namespace System.IO.Enumeration
                         DirectoryFinished();
                         return false;
                     }
-                    throw Win32Marshal.GetExceptionForWin32Error(error, _currentPath);
+                    throw Win32Marshal.GetExceptionForWin32Error(error, new string(_currentPath.Segment));
             }
         }
 
-        private IntPtr CreateRelativeDirectoryHandle(ReadOnlySpan<char> relativePath, string fullPath)
+        private IntPtr CreateRelativeDirectoryHandle(ReadOnlySpan<char> relativePath, ReadOnlySpan<char> fullPath)
         {
             (int status, IntPtr handle) = Interop.NtDll.CreateFile(
                 relativePath,
@@ -71,7 +71,7 @@ namespace System.IO.Enumeration
                     {
                         return IntPtr.Zero;
                     }
-                    throw Win32Marshal.GetExceptionForWin32Error(error, fullPath);
+                    throw Win32Marshal.GetExceptionForWin32Error(error, new string(fullPath));
             }
         }
     }

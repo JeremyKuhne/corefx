@@ -29,9 +29,9 @@ namespace System.IO.Enumeration
 
         private byte[] _buffer;
         private IntPtr _directoryHandle;
-        private string _currentPath;
+        private BufferMemory<char> _currentPath;
         private bool _lastEntryFound;
-        private Queue<(IntPtr Handle, string Path)> _pending;
+        private Queue<(IntPtr Handle, BufferMemory<char> Path)> _pending;
         private GCHandle _pinnedBuffer;
 
         /// <summary>
@@ -42,7 +42,7 @@ namespace System.IO.Enumeration
         public FileSystemEnumerator(string directory, EnumerationOptions options = null)
         {
             _originalRootDirectory = directory ?? throw new ArgumentNullException(nameof(directory));
-            _rootDirectory = Path.GetFullPath(directory).TrimEnd(Path.DirectorySeparatorChar);
+            _rootDirectory = PathHelpers.TrimEndingDirectorySeparator(Path.GetFullPath(directory));
             _options = options ?? EnumerationOptions.Default;
 
             // We'll only suppress the media insertion prompt on the topmost directory as that is the
@@ -57,7 +57,7 @@ namespace System.IO.Enumeration
                     _lastEntryFound = true;
             }
 
-            _currentPath = _rootDirectory;
+            _currentPath = new BufferMemory<char>(_rootDirectory);
 
             int requestedBufferSize = _options.BufferSize;
             int bufferSize = requestedBufferSize <= 0 ? StandardBufferSize
@@ -137,7 +137,7 @@ namespace System.IO.Enumeration
                         return false;
 
                     // Calling the constructor inside the try block would create a second instance on the stack.
-                    FileSystemEntry.Initialize(ref entry, _entry, _currentPath, _rootDirectory, _originalRootDirectory);
+                    FileSystemEntry.Initialize(ref entry, _entry, _currentPath.Segment, _rootDirectory, _originalRootDirectory);
 
                     // Skip specified attributes
                     if ((_entry->FileAttributes & _options.AttributesToSkip) != 0)
@@ -155,22 +155,31 @@ namespace System.IO.Enumeration
                         else if (_options.RecurseSubdirectories && ShouldRecurseIntoEntry(ref entry))
                         {
                             // Recursion is on and the directory was accepted, Queue it
-                            string subDirectory = PathHelpers.CombineNoChecks(_currentPath, _entry->FileName);
-                            IntPtr subDirectoryHandle = CreateRelativeDirectoryHandle(_entry->FileName, subDirectory);
-                            if (subDirectoryHandle != IntPtr.Zero)
+                            BufferMemory<char> memory = default;
+                            PathHelpers.CombineInto(_currentPath.Segment, _entry->FileName, ref memory);
+                            try
                             {
-                                try
+                                IntPtr subDirectoryHandle = CreateRelativeDirectoryHandle(_entry->FileName, memory.Segment);
+                                if (subDirectoryHandle != IntPtr.Zero)
                                 {
-                                    if (_pending == null)
-                                        _pending = new Queue<(IntPtr, string)>();
-                                    _pending.Enqueue((subDirectoryHandle, subDirectory));
+                                    try
+                                    {
+                                        if (_pending == null)
+                                            _pending = new Queue<(IntPtr, BufferMemory<char>)>();
+                                        _pending.Enqueue((subDirectoryHandle, memory));
+                                    }
+                                    catch
+                                    {
+                                        // Couldn't queue the handle, close it and rethrow
+                                        Interop.Kernel32.CloseHandle(subDirectoryHandle);
+                                        throw;
+                                    }
                                 }
-                                catch
-                                {
-                                    // Couldn't queue the handle, close it and rethrow
-                                    Interop.Kernel32.CloseHandle(subDirectoryHandle);
-                                    throw;
-                                }
+                            }
+                            catch
+                            {
+                                memory.Dispose();
+                                throw;
                             }
                         }
                     }
@@ -197,6 +206,7 @@ namespace System.IO.Enumeration
 
         private void DequeueNextDirectory()
         {
+            _currentPath.Dispose();
             (_directoryHandle, _currentPath) = _pending.Dequeue();
         }
 
@@ -214,7 +224,11 @@ namespace System.IO.Enumeration
                     if (_pending != null)
                     {
                         while (_pending.Count > 0)
-                            Interop.Kernel32.CloseHandle(_pending.Dequeue().Handle);
+                        {
+                            (IntPtr handle, BufferMemory<char> memory) = _pending.Dequeue();
+                            Interop.Kernel32.CloseHandle(handle);
+                            memory.Dispose();
+                        }
                         _pending = null;
                     }
 

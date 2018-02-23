@@ -48,7 +48,7 @@ namespace System.IO.Enumeration
 
             // Close the handle now that we're done
             CloseDirectoryHandle();
-            OnDirectoryFinished(_currentPath);
+            OnDirectoryFinished(_currentPath.Segment);
 
             if (_pending == null || _pending.Count == 0)
             {
