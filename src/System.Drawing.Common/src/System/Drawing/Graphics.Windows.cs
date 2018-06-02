@@ -860,28 +860,22 @@ namespace System.Drawing
         /// <summary>
         /// Draws a series of cubic Bezier curves from an array of points.
         /// </summary>
-        public void DrawBeziers(Pen pen, Point[] points)
+        public unsafe void DrawBeziers(Pen pen, Point[] points)
         {
             if (pen == null)
-            {
                 throw new ArgumentNullException(nameof(pen));
-            }
 
             if (points == null)
-            {
                 throw new ArgumentNullException(nameof(points));
-            }
 
-            IntPtr buf = SafeNativeMethods.Gdip.ConvertPointToMemory(points);
-            try
+            fixed (Point* p = points)
             {
-                int status = SafeNativeMethods.Gdip.GdipDrawBeziersI(new HandleRef(this, NativeGraphics), new HandleRef(pen, pen.NativePen),
-                                                      new HandleRef(this, buf), points.Length);
+                int status = SafeNativeMethods.Gdip.GdipDrawBeziersI(
+                    new HandleRef(this, NativeGraphics),
+                    new HandleRef(pen, pen.NativePen),
+                    new HandleRef(this, new IntPtr(p)), points.Length);
+
                 CheckErrorStatus(status);
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(buf);
             }
         }
 
