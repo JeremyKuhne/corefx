@@ -1,16 +1,12 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // See the LICENSE file in the project root for more information.
 
-using System.Drawing.Imaging;
-using System.IO;
 using Xunit;
 
 namespace System.Drawing.Tests
 {
-    public class Graphics_DrawBezierTests
+    public class Graphics_DrawBezierTests : DrawingTest
     {
-        private static Security.Cryptography.MD5 s_md5 = Security.Cryptography.MD5.Create();
-
         [ConditionalFact(Helpers.GdiplusIsAvailable)]
         public void DrawBezier_Point()
         {
@@ -47,14 +43,24 @@ namespace System.Drawing.Tests
             }
         }
 
-        private void ValidateImageContent(Image image, byte[] expectedHash)
+        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        public void DrawBezier_PointFs()
         {
-            using (MemoryStream stream = new MemoryStream(4096))
+            using (Bitmap image = new Bitmap(100, 100))
+            using (Pen pen = new Pen(Color.Red))
+            using (Graphics graphics = Graphics.FromImage(image))
             {
-                image.Save(stream, ImageFormat.Bmp);
-                stream.Seek(0, SeekOrigin.Begin);
-                byte[] hash = s_md5.ComputeHash(stream);
-                Assert.Equal(expectedHash, hash);
+                PointF[] points =
+                {
+                    new PointF(10.0F, 10.0F), new PointF(20.0F, 1.0F), new PointF(35.0F, 5.0F), new PointF(50.0F, 10.0F),
+                    new PointF(60.0F, 15.0F), new PointF(65.0F, 25.0F), new PointF(50.0F, 30.0F)
+                };
+
+                graphics.DrawBeziers(pen, points);
+                ValidateImageContent(image,
+                    PlatformDetection.IsWindows
+                        ? new byte[] { 0xd0, 0x00, 0x08, 0x21, 0x06, 0x29, 0xd8, 0xab, 0x19, 0xc5, 0xc9, 0xf6, 0xf2, 0x69, 0x30, 0x1f }
+                        : new byte[] { 0x9d, 0x24, 0x9f, 0x91, 0xa3, 0xa5, 0x60, 0xde, 0x14, 0x69, 0x42, 0xa8, 0xe6, 0xc6, 0xbf, 0xc9 });
             }
         }
 
