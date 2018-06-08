@@ -74,12 +74,13 @@ namespace System.Drawing.Printing
         /// </summary>
         public static Margins Convert(Margins value, PrinterUnit fromUnit, PrinterUnit toUnit)
         {
-            Margins result = new Margins();
-
-            result.DoubleLeft = Convert(value.DoubleLeft, fromUnit, toUnit);
-            result.DoubleRight = Convert(value.DoubleRight, fromUnit, toUnit);
-            result.DoubleTop = Convert(value.DoubleTop, fromUnit, toUnit);
-            result.DoubleBottom = Convert(value.DoubleBottom, fromUnit, toUnit);
+            Margins result = new Margins
+            {
+                DoubleLeft = Convert(value.DoubleLeft, fromUnit, toUnit),
+                DoubleRight = Convert(value.DoubleRight, fromUnit, toUnit),
+                DoubleTop = Convert(value.DoubleTop, fromUnit, toUnit),
+                DoubleBottom = Convert(value.DoubleBottom, fromUnit, toUnit)
+            };
 
             return result;
         }

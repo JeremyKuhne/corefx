@@ -36,7 +36,6 @@ namespace System.Drawing
             // In the case were we have contention on the buffer - i.e. two threads 
             // trying to use the buffer at the same time, we just create a temp 
             // buffermanager and have the buffer dispose of it when it is done.
-            //
             if (oldBusy != BufferFree)
             {
                 return AllocBufferInTempManager(targetGraphics, targetDC, targetRectangle);
@@ -239,9 +238,8 @@ namespace System.Drawing
         /// <summary>
         /// Create a DIB section with an optimal format w.r.t. the specified hdc.
         ///
-        /// If DIB <= 8bpp, then the DIB color table is initialized based on the
-        /// specified palette. If the palette handle is NULL, then the system
-        /// palette is used.
+        /// If DIB is less than or equal to 8bpp, then the DIB color table is initialized based on the
+        /// specified palette. If the palette handle is NULL, then the system palette is used.
         ///
         /// Note: The hdc must be a direct DC (not an info or memory DC).
         ///
@@ -254,9 +252,7 @@ namespace System.Drawing
         private IntPtr CreateCompatibleDIB(IntPtr hdc, IntPtr hpal, int ulWidth, int ulHeight, ref IntPtr ppvBits)
         {
             if (hdc == IntPtr.Zero)
-            {
                 throw new ArgumentNullException(nameof(hdc));
-            }
 
             IntPtr hbmRet = IntPtr.Zero;
             var pbmi = new NativeMethods.BITMAPINFO_FLAT();

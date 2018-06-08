@@ -44,9 +44,7 @@ namespace System.Drawing
         internal Icon(IntPtr handle, bool takeOwnership)
         {
             if (handle == IntPtr.Zero)
-            {
                 throw new ArgumentException(SR.Format(SR.InvalidGDIHandle, nameof(Icon)));
-            }
 
             _handle = handle;
             _ownHandle = takeOwnership;
@@ -79,9 +77,7 @@ namespace System.Drawing
         public Icon(Icon original, int width, int height) : this()
         {
             if (original == null)
-            {
                 throw new ArgumentNullException(nameof(original));
-            }
 
             _iconData = original._iconData;
 
@@ -100,9 +96,7 @@ namespace System.Drawing
         {
             Stream stream = type.Module.Assembly.GetManifestResourceStream(type, resource);
             if (stream == null)
-            {
                 throw new ArgumentException(SR.Format(SR.ResourceNotFound, type, resource));
-            }
 
             _iconData = new byte[(int)stream.Length];
             stream.Read(_iconData, 0, _iconData.Length);
@@ -120,9 +114,7 @@ namespace System.Drawing
         public Icon(Stream stream, int width, int height) : this()
         {
             if (stream == null)
-            {
                 throw new ArgumentNullException(nameof(stream));
-            }
 
             _iconData = new byte[(int)stream.Length];
             stream.Read(_iconData, 0, _iconData.Length);
@@ -134,9 +126,7 @@ namespace System.Drawing
         private static Icon ExtractAssociatedIcon(string filePath, int index)
         {
             if (filePath == null)
-            {
                 throw new ArgumentNullException(nameof(filePath));
-            }
 
             Uri uri;
             try
@@ -151,28 +141,20 @@ namespace System.Drawing
             }
 
             if (uri.IsUnc)
-            {
                 throw new ArgumentException(SR.Format(SR.InvalidArgumentValue, nameof(filePath), filePath));
-            }
 
             if (!uri.IsFile)
-            {
                 return null;
-            }
 
             if (!File.Exists(filePath))
-            {
                 throw new FileNotFoundException(filePath);
-            }
 
             var sb = new StringBuilder(NativeMethods.MAX_PATH);
             sb.Append(filePath);
 
             IntPtr hIcon = SafeNativeMethods.ExtractAssociatedIcon(NativeMethods.NullHandleRef, sb, ref index);
             if (hIcon != IntPtr.Zero)
-            {
                 return new Icon(hIcon, true);
-            }
 
             return null;
         }

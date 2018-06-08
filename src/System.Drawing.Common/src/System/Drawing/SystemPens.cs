@@ -57,9 +57,7 @@ namespace System.Drawing
         public static Pen FromSystemColor(Color c)
         {
             if (!ColorUtil.IsSystemColor(c))
-            {
                 throw new ArgumentException(SR.Format(SR.ColorNotSystemColor, c.ToString()));
-            }
 
             Pen[] systemPens = (Pen[])SafeNativeMethods.Gdip.ThreadData[s_systemPensKey];
             if (systemPens == null)

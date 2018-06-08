@@ -184,11 +184,10 @@ namespace System.Drawing
         public EncoderParameters GetEncoderParameterList(Guid encoder)
         {
             EncoderParameters p;
-            int size;
 
             int status = SafeNativeMethods.Gdip.GdipGetEncoderParameterListSize(new HandleRef(this, nativeImage),
                                                                  ref encoder,
-                                                                 out size);
+                                                                 out int size);
             SafeNativeMethods.Gdip.CheckStatus(status);
 
             if (size <= 0)
@@ -514,9 +513,8 @@ namespace System.Drawing
         {
             get
             {
-                int count;
 
-                int status = SafeNativeMethods.Gdip.GdipImageGetFrameDimensionsCount(new HandleRef(this, nativeImage), out count);
+                int status = SafeNativeMethods.Gdip.GdipImageGetFrameDimensionsCount(new HandleRef(this, nativeImage), out int count);
                 SafeNativeMethods.Gdip.CheckStatus(status);
 
                 Debug.Assert(count >= 0, "FrameDimensionsList returns bad count");
@@ -567,9 +565,8 @@ namespace System.Drawing
         {
             get
             {
-                int count;
 
-                int status = SafeNativeMethods.Gdip.GdipGetPropertyCount(new HandleRef(this, nativeImage), out count);
+                int status = SafeNativeMethods.Gdip.GdipGetPropertyCount(new HandleRef(this, nativeImage), out int count);
                 SafeNativeMethods.Gdip.CheckStatus(status);
 
                 int[] propid = new int[count];
@@ -591,9 +588,8 @@ namespace System.Drawing
         public PropertyItem GetPropertyItem(int propid)
         {
             PropertyItem propitem;
-            int size;
 
-            int status = SafeNativeMethods.Gdip.GdipGetPropertyItemSize(new HandleRef(this, nativeImage), propid, out size);
+            int status = SafeNativeMethods.Gdip.GdipGetPropertyItemSize(new HandleRef(this, nativeImage), propid, out int size);
             SafeNativeMethods.Gdip.CheckStatus(status);
 
             if (size == 0)
@@ -641,13 +637,11 @@ namespace System.Drawing
         {
             get
             {
-                int size;
-                int count;
 
-                int status = SafeNativeMethods.Gdip.GdipGetPropertyCount(new HandleRef(this, nativeImage), out count);
+                int status = SafeNativeMethods.Gdip.GdipGetPropertyCount(new HandleRef(this, nativeImage), out int count);
                 SafeNativeMethods.Gdip.CheckStatus(status);
 
-                status = SafeNativeMethods.Gdip.GdipGetPropertySize(new HandleRef(this, nativeImage), out size, ref count);
+                status = SafeNativeMethods.Gdip.GdipGetPropertySize(new HandleRef(this, nativeImage), out int size, ref count);
                 SafeNativeMethods.Gdip.CheckStatus(status);
 
                 if (size == 0 || count == 0)

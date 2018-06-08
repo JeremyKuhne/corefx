@@ -13,14 +13,13 @@ namespace System.Drawing.Printing
     /// </summary>
     public partial class PageSettings : ICloneable
     {
-        internal PrinterSettings printerSettings;
+        internal PrinterSettings _printerSettings;
 
         private TriState _color = TriState.Default;
         private PaperSize _paperSize;
         private PaperSource _paperSource;
         private PrinterResolution _printerResolution;
         private TriState _landscape = TriState.Default;
-        private Margins _margins = new Margins();
 
         /// <summary>
         /// Initializes a new instance of the <see cref='PageSettings'/> class using the default printer.
@@ -35,7 +34,7 @@ namespace System.Drawing.Printing
         public PageSettings(PrinterSettings printerSettings)
         {
             Debug.Assert(printerSettings != null, "printerSettings == null");
-            this.printerSettings = printerSettings;
+            _printerSettings = printerSettings;
         }
 
         /// <summary>
@@ -45,7 +44,7 @@ namespace System.Drawing.Printing
         {
             get
             {
-                IntPtr modeHandle = printerSettings.GetHdevmode();
+                IntPtr modeHandle = _printerSettings.GetHdevmode();
 
                 Rectangle pageBounds = GetBounds(modeHandle);
 
@@ -62,7 +61,7 @@ namespace System.Drawing.Printing
             get
             {
                 if (_color.IsDefault)
-                    return printerSettings.GetModeField(ModeField.Color, SafeNativeMethods.DMCOLOR_MONOCHROME) == SafeNativeMethods.DMCOLOR_COLOR;
+                    return _printerSettings.GetModeField(ModeField.Color, SafeNativeMethods.DMCOLOR_MONOCHROME) == SafeNativeMethods.DMCOLOR_COLOR;
                 else
                     return (bool)_color;
             }
@@ -77,7 +76,7 @@ namespace System.Drawing.Printing
             get
             {
                 float hardMarginX = 0;
-                DeviceContext dc = printerSettings.CreateDeviceContext(this);
+                DeviceContext dc = _printerSettings.CreateDeviceContext(this);
 
                 try
                 {
@@ -102,7 +101,7 @@ namespace System.Drawing.Printing
             get
             {
                 float hardMarginY = 0;
-                DeviceContext dc = printerSettings.CreateDeviceContext(this);
+                DeviceContext dc = _printerSettings.CreateDeviceContext(this);
 
                 try
                 {
@@ -126,7 +125,7 @@ namespace System.Drawing.Printing
             get
             {
                 if (_landscape.IsDefault)
-                    return printerSettings.GetModeField(ModeField.Orientation, SafeNativeMethods.DMORIENT_PORTRAIT) == SafeNativeMethods.DMORIENT_LANDSCAPE;
+                    return _printerSettings.GetModeField(ModeField.Orientation, SafeNativeMethods.DMORIENT_PORTRAIT) == SafeNativeMethods.DMORIENT_LANDSCAPE;
                 else
                     return (bool)_landscape;
             }
@@ -136,22 +135,15 @@ namespace System.Drawing.Printing
         /// <summary>
         /// Gets or sets a value indicating the margins for this page.
         /// </summary>
-        public Margins Margins
-        {
-            get { return _margins; }
-            set { _margins = value; }
-        }
+        public Margins Margins { get; set; } = new Margins();
 
         /// <summary>
         /// Gets or sets the paper size.
         /// </summary>
         public PaperSize PaperSize
         {
-            get
-            {
-                return GetPaperSize(IntPtr.Zero);
-            }
-            set { _paperSize = value; }
+            get => GetPaperSize(IntPtr.Zero);
+            set => _paperSize = value;
         }
 
         /// <summary>
@@ -163,7 +155,7 @@ namespace System.Drawing.Printing
             {
                 if (_paperSource == null)
                 {
-                    IntPtr modeHandle = printerSettings.GetHdevmode();
+                    IntPtr modeHandle = _printerSettings.GetHdevmode();
                     IntPtr modePointer = SafeNativeMethods.GlobalLock(new HandleRef(this, modeHandle));
                     SafeNativeMethods.DEVMODE mode = (SafeNativeMethods.DEVMODE)Marshal.PtrToStructure(modePointer, typeof(SafeNativeMethods.DEVMODE));
 
@@ -175,9 +167,11 @@ namespace System.Drawing.Printing
                     return result;
                 }
                 else
+                {
                     return _paperSource;
+                }
             }
-            set { _paperSource = value; }
+            set => _paperSource = value;
         }
 
         /// <summary>
@@ -188,7 +182,7 @@ namespace System.Drawing.Printing
             get
             {
                 RectangleF printableArea = new RectangleF();
-                DeviceContext dc = printerSettings.CreateInformationContext(this);
+                DeviceContext dc = _printerSettings.CreateInformationContext(this);
                 HandleRef hdc = new HandleRef(dc, dc.Hdc);
 
                 try
@@ -232,7 +226,7 @@ namespace System.Drawing.Printing
             {
                 if (_printerResolution == null)
                 {
-                    IntPtr modeHandle = printerSettings.GetHdevmode();
+                    IntPtr modeHandle = _printerSettings.GetHdevmode();
                     IntPtr modePointer = SafeNativeMethods.GlobalLock(new HandleRef(this, modeHandle));
                     SafeNativeMethods.DEVMODE mode = (SafeNativeMethods.DEVMODE)Marshal.PtrToStructure(modePointer, typeof(SafeNativeMethods.DEVMODE));
 
@@ -244,12 +238,11 @@ namespace System.Drawing.Printing
                     return result;
                 }
                 else
+                {
                     return _printerResolution;
+                }
             }
-            set
-            {
-                _printerResolution = value;
-            }
+            set => _printerResolution = value;
         }
 
         /// <summary>
@@ -257,13 +250,8 @@ namespace System.Drawing.Printing
         /// </summary>
         public PrinterSettings PrinterSettings
         {
-            get { return printerSettings; }
-            set
-            {
-                if (value == null)
-                    value = new PrinterSettings();
-                printerSettings = value;
-            }
+            get => _printerSettings;
+            set => _printerSettings = value ??  new PrinterSettings();
         }
 
         /// <summary>
@@ -272,7 +260,7 @@ namespace System.Drawing.Printing
         public object Clone()
         {
             PageSettings result = (PageSettings)MemberwiseClone();
-            result._margins = (Margins)_margins.Clone();
+            result.Margins = (Margins)Margins.Clone();
             return result;
         }
 
@@ -367,7 +355,7 @@ namespace System.Drawing.Printing
             // a buffer overrun
             if (mode.dmDriverExtra >= ExtraBytes)
             {
-                int retCode = SafeNativeMethods.DocumentProperties(NativeMethods.NullHandleRef, NativeMethods.NullHandleRef, printerSettings.PrinterName, modePointer, modePointer, SafeNativeMethods.DM_IN_BUFFER | SafeNativeMethods.DM_OUT_BUFFER);
+                int retCode = SafeNativeMethods.DocumentProperties(NativeMethods.NullHandleRef, NativeMethods.NullHandleRef, _printerSettings.PrinterName, modePointer, modePointer, SafeNativeMethods.DM_IN_BUFFER | SafeNativeMethods.DM_OUT_BUFFER);
                 if (retCode < 0)
                 {
                     SafeNativeMethods.GlobalFree(new HandleRef(null, modePointer));
@@ -381,7 +369,7 @@ namespace System.Drawing.Printing
         {
             get
             {
-                IntPtr modeHandle = printerSettings.GetHdevmodeInternal();
+                IntPtr modeHandle = _printerSettings.GetHdevmodeInternal();
                 IntPtr modePointer = SafeNativeMethods.GlobalLock(new HandleRef(this, modeHandle));
                 SafeNativeMethods.DEVMODE mode = (SafeNativeMethods.DEVMODE)Marshal.PtrToStructure(modePointer, typeof(SafeNativeMethods.DEVMODE));
 
@@ -409,12 +397,9 @@ namespace System.Drawing.Printing
         }
 
         private bool GetLandscape(IntPtr modeHandle)
-        {
-            if (_landscape.IsDefault)
-                return printerSettings.GetModeField(ModeField.Orientation, SafeNativeMethods.DMORIENT_PORTRAIT, modeHandle) == SafeNativeMethods.DMORIENT_LANDSCAPE;
-            else
-                return (bool)_landscape;
-        }
+            => _landscape.IsDefault
+                ? _printerSettings.GetModeField(ModeField.Orientation, SafeNativeMethods.DMORIENT_PORTRAIT, modeHandle) == SafeNativeMethods.DMORIENT_LANDSCAPE
+                : (bool)_landscape;
 
         private PaperSize GetPaperSize(IntPtr modeHandle)
         {
@@ -423,7 +408,7 @@ namespace System.Drawing.Printing
                 bool ownHandle = false;
                 if (modeHandle == IntPtr.Zero)
                 {
-                    modeHandle = printerSettings.GetHdevmode();
+                    modeHandle = _printerSettings.GetHdevmode();
                     ownHandle = true;
                 }
 
@@ -440,29 +425,33 @@ namespace System.Drawing.Printing
                 return result;
             }
             else
+            {
                 return _paperSize;
+            }
         }
 
         private PaperSize PaperSizeFromMode(SafeNativeMethods.DEVMODE mode)
         {
-            PaperSize[] sizes = printerSettings.Get_PaperSizes();
+            PaperSize[] sizes = _printerSettings.Get_PaperSizes();
             if ((mode.dmFields & SafeNativeMethods.DM_PAPERSIZE) == SafeNativeMethods.DM_PAPERSIZE)
             {
                 for (int i = 0; i < sizes.Length; i++)
                 {
-                    if ((int)sizes[i].RawKind == mode.dmPaperSize)
+                    if (sizes[i].RawKind == mode.dmPaperSize)
                         return sizes[i];
                 }
             }
-            return new PaperSize(PaperKind.Custom, "custom",
-                                     //mode.dmPaperWidth, mode.dmPaperLength);
-                                     PrinterUnitConvert.Convert(mode.dmPaperWidth, PrinterUnit.TenthsOfAMillimeter, PrinterUnit.Display),
-                                     PrinterUnitConvert.Convert(mode.dmPaperLength, PrinterUnit.TenthsOfAMillimeter, PrinterUnit.Display));
+
+            return new PaperSize(
+                PaperKind.Custom,
+                "custom",
+                PrinterUnitConvert.Convert(mode.dmPaperWidth, PrinterUnit.TenthsOfAMillimeter, PrinterUnit.Display),
+                PrinterUnitConvert.Convert(mode.dmPaperLength, PrinterUnit.TenthsOfAMillimeter, PrinterUnit.Display));
         }
 
         private PaperSource PaperSourceFromMode(SafeNativeMethods.DEVMODE mode)
         {
-            PaperSource[] sources = printerSettings.Get_PaperSources();
+            PaperSource[] sources = _printerSettings.Get_PaperSources();
             if ((mode.dmFields & SafeNativeMethods.DM_DEFAULTSOURCE) == SafeNativeMethods.DM_DEFAULTSOURCE)
             {
                 for (int i = 0; i < sources.Length; i++)
@@ -480,7 +469,7 @@ namespace System.Drawing.Printing
 
         private PrinterResolution PrinterResolutionFromMode(SafeNativeMethods.DEVMODE mode)
         {
-            PrinterResolution[] resolutions = printerSettings.Get_PrinterResolutions();
+            PrinterResolution[] resolutions = _printerSettings.Get_PrinterResolutions();
             for (int i = 0; i < resolutions.Length; i++)
             {
                 if (mode.dmPrintQuality >= 0 && ((mode.dmFields & SafeNativeMethods.DM_PRINTQUALITY) == SafeNativeMethods.DM_PRINTQUALITY)
@@ -499,8 +488,8 @@ namespace System.Drawing.Printing
                     }
                 }
             }
-            return new PrinterResolution(PrinterResolutionKind.Custom,
-                                         mode.dmPrintQuality, mode.dmYResolution);
+
+            return new PrinterResolution(PrinterResolutionKind.Custom, mode.dmPrintQuality, mode.dmYResolution);
         }
 
         /// <summary>

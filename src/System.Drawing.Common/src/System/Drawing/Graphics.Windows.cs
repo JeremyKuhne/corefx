@@ -252,8 +252,7 @@ namespace System.Drawing
         {
             get
             {
-                int mode = 0;
-                int status = SafeNativeMethods.Gdip.GdipGetCompositingMode(new HandleRef(this, NativeGraphics), out mode);
+                int status = SafeNativeMethods.Gdip.GdipGetCompositingMode(new HandleRef(this, NativeGraphics), out int mode);
                 SafeNativeMethods.Gdip.CheckStatus(status);
 
                 return (CompositingMode)mode;
@@ -274,8 +273,7 @@ namespace System.Drawing
         {
             get
             {
-                int x, y;
-                int status = SafeNativeMethods.Gdip.GdipGetRenderingOrigin(new HandleRef(this, NativeGraphics), out x, out y);
+                int status = SafeNativeMethods.Gdip.GdipGetRenderingOrigin(new HandleRef(this, NativeGraphics), out int x, out int y);
                 SafeNativeMethods.Gdip.CheckStatus(status);
 
                 return new Point(x, y);
@@ -291,8 +289,7 @@ namespace System.Drawing
         {
             get
             {
-                CompositingQuality cq;
-                int status = SafeNativeMethods.Gdip.GdipGetCompositingQuality(new HandleRef(this, NativeGraphics), out cq);
+                int status = SafeNativeMethods.Gdip.GdipGetCompositingQuality(new HandleRef(this, NativeGraphics), out CompositingQuality cq);
                 SafeNativeMethods.Gdip.CheckStatus(status);
 
                 return cq;
@@ -316,9 +313,8 @@ namespace System.Drawing
         {
             get
             {
-                TextRenderingHint hint = 0;
 
-                int status = SafeNativeMethods.Gdip.GdipGetTextRenderingHint(new HandleRef(this, NativeGraphics), out hint);
+                int status = SafeNativeMethods.Gdip.GdipGetTextRenderingHint(new HandleRef(this, NativeGraphics), out TextRenderingHint hint);
                 SafeNativeMethods.Gdip.CheckStatus(status);
 
                 return hint;
@@ -339,8 +335,7 @@ namespace System.Drawing
         {
             get
             {
-                int textContrast = 0;
-                int status = SafeNativeMethods.Gdip.GdipGetTextContrast(new HandleRef(this, NativeGraphics), out textContrast);
+                int status = SafeNativeMethods.Gdip.GdipGetTextContrast(new HandleRef(this, NativeGraphics), out int textContrast);
                 SafeNativeMethods.Gdip.CheckStatus(status);
 
                 return textContrast;
@@ -356,8 +351,7 @@ namespace System.Drawing
         {
             get
             {
-                SmoothingMode mode = 0;
-                int status = SafeNativeMethods.Gdip.GdipGetSmoothingMode(new HandleRef(this, NativeGraphics), out mode);
+                int status = SafeNativeMethods.Gdip.GdipGetSmoothingMode(new HandleRef(this, NativeGraphics), out SmoothingMode mode);
                 SafeNativeMethods.Gdip.CheckStatus(status);
 
                 return mode;
@@ -378,8 +372,7 @@ namespace System.Drawing
         {
             get
             {
-                PixelOffsetMode mode = 0;
-                int status = SafeNativeMethods.Gdip.GdipGetPixelOffsetMode(new HandleRef(this, NativeGraphics), out mode);
+                int status = SafeNativeMethods.Gdip.GdipGetPixelOffsetMode(new HandleRef(this, NativeGraphics), out PixelOffsetMode mode);
                 SafeNativeMethods.Gdip.CheckStatus(status);
 
                 return mode;
@@ -417,8 +410,7 @@ namespace System.Drawing
         {
             get
             {
-                int mode = 0;
-                int status = SafeNativeMethods.Gdip.GdipGetInterpolationMode(new HandleRef(this, NativeGraphics), out mode);
+                int status = SafeNativeMethods.Gdip.GdipGetInterpolationMode(new HandleRef(this, NativeGraphics), out int mode);
                 SafeNativeMethods.Gdip.CheckStatus(status);
 
                 return (InterpolationMode)mode;
@@ -439,8 +431,7 @@ namespace System.Drawing
         {
             get
             {
-                int unit = 0;
-                int status = SafeNativeMethods.Gdip.GdipGetPageUnit(new HandleRef(this, NativeGraphics), out unit);
+                int status = SafeNativeMethods.Gdip.GdipGetPageUnit(new HandleRef(this, NativeGraphics), out int unit);
                 SafeNativeMethods.Gdip.CheckStatus(status);
 
                 return (GraphicsUnit)unit;
@@ -1113,7 +1104,7 @@ namespace System.Drawing
             }
 
             int status = SafeNativeMethods.Gdip.GdipDrawPath(new HandleRef(this, NativeGraphics), new HandleRef(pen, pen.NativePen),
-                                              new HandleRef(path, path.nativePath));
+                                              new HandleRef(path, path._nativePath));
             CheckErrorStatus(status);
         }
 
@@ -1691,7 +1682,7 @@ namespace System.Drawing
             }
 
             int status = SafeNativeMethods.Gdip.GdipFillPath(new HandleRef(this, NativeGraphics), new HandleRef(brush, brush.NativeBrush),
-                                              new HandleRef(path, path.nativePath));
+                                              new HandleRef(path, path._nativePath));
             CheckErrorStatus(status);
         }
 
@@ -1928,12 +1919,10 @@ namespace System.Drawing
 
             var grf = new GPRECTF(origin.X, origin.Y, 0, 0);
             var grfboundingBox = new GPRECTF();
-
-            int a, b;
             int status = SafeNativeMethods.Gdip.GdipMeasureString(new HandleRef(this, NativeGraphics), text, text.Length, new HandleRef(font, font.NativeFont),
                 ref grf,
                 new HandleRef(stringFormat, (stringFormat == null) ? IntPtr.Zero : stringFormat.nativeFormat),
-                ref grfboundingBox, out a, out b);
+                ref grfboundingBox, out int a, out int b);
             SafeNativeMethods.Gdip.CheckStatus(status);
 
             return grfboundingBox.SizeF;
@@ -1958,12 +1947,10 @@ namespace System.Drawing
 
             var grfLayout = new GPRECTF(0, 0, layoutArea.Width, layoutArea.Height);
             var grfboundingBox = new GPRECTF();
-
-            int a, b;
             int status = SafeNativeMethods.Gdip.GdipMeasureString(new HandleRef(this, NativeGraphics), text, text.Length, new HandleRef(font, font.NativeFont),
                 ref grfLayout,
                 new HandleRef(stringFormat, (stringFormat == null) ? IntPtr.Zero : stringFormat.nativeFormat),
-                ref grfboundingBox, out a, out b);
+                ref grfboundingBox, out int a, out int b);
             SafeNativeMethods.Gdip.CheckStatus(status);
 
             return grfboundingBox.SizeF;
@@ -1997,9 +1984,8 @@ namespace System.Drawing
                 throw new ArgumentNullException(nameof(font));
             }
 
-            int count;
             int status = SafeNativeMethods.Gdip.GdipGetStringFormatMeasurableCharacterRangeCount(new HandleRef(stringFormat, (stringFormat == null) ? IntPtr.Zero : stringFormat.nativeFormat),
-                out count);
+                out int count);
             SafeNativeMethods.Gdip.CheckStatus(status);
 
             var gpRegions = new IntPtr[count];
@@ -3306,8 +3292,7 @@ namespace System.Drawing
         public GraphicsState Save()
         {
             var context = new GraphicsContext(this);
-            int state = 0;
-            int status = SafeNativeMethods.Gdip.GdipSaveGraphics(new HandleRef(this, NativeGraphics), out state);
+            int status = SafeNativeMethods.Gdip.GdipSaveGraphics(new HandleRef(this, NativeGraphics), out int state);
 
             if (status != SafeNativeMethods.Gdip.Ok)
             {
@@ -3333,13 +3318,12 @@ namespace System.Drawing
         public GraphicsContainer BeginContainer(RectangleF dstrect, RectangleF srcrect, GraphicsUnit unit)
         {
             var context = new GraphicsContext(this);
-            int state = 0;
 
             var dstf = new GPRECTF(dstrect);
             var srcf = new GPRECTF(srcrect);
 
             int status = SafeNativeMethods.Gdip.GdipBeginContainer(new HandleRef(this, NativeGraphics), ref dstf,
-                                                    ref srcf, unchecked((int)unit), out state);
+                                                    ref srcf, unchecked((int)unit), out int state);
 
             if (status != SafeNativeMethods.Gdip.Ok)
             {
@@ -3356,8 +3340,7 @@ namespace System.Drawing
         public GraphicsContainer BeginContainer()
         {
             var context = new GraphicsContext(this);
-            int state = 0;
-            int status = SafeNativeMethods.Gdip.GdipBeginContainer2(new HandleRef(this, NativeGraphics), out state);
+            int status = SafeNativeMethods.Gdip.GdipBeginContainer2(new HandleRef(this, NativeGraphics), out int state);
 
             if (status != SafeNativeMethods.Gdip.Ok)
             {
@@ -3387,13 +3370,12 @@ namespace System.Drawing
         public GraphicsContainer BeginContainer(Rectangle dstrect, Rectangle srcrect, GraphicsUnit unit)
         {
             var context = new GraphicsContext(this);
-            int state = 0;
 
             var gpDest = new GPRECT(dstrect);
             var gpSrc = new GPRECT(srcrect);
 
             int status = SafeNativeMethods.Gdip.GdipBeginContainerI(new HandleRef(this, NativeGraphics), ref gpDest,
-                                                     ref gpSrc, unchecked((int)unit), out state);
+                                                     ref gpSrc, unchecked((int)unit), out int state);
 
             if (status != SafeNativeMethods.Gdip.Ok)
             {

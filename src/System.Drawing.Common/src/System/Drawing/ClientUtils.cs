@@ -98,14 +98,10 @@ namespace System.Drawing
             public override bool Equals(object obj)
             {
                 if (!(obj is WeakRefCollection other))
-                {
                     return true;
-                }
 
                 if (other == null || Count != other.Count)
-                {
                     return false;
-                }
 
                 for (int i = 0; i < Count; i++)
                 {
@@ -126,9 +122,7 @@ namespace System.Drawing
             private WeakRefObject CreateWeakRefObject(object value)
             {
                 if (value == null)
-                {
                     return null;
-                }
 
                 return new WeakRefObject(value);
             }
@@ -165,9 +159,7 @@ namespace System.Drawing
             public void RemoveByHashCode(object value)
             {
                 if (value == null)
-                {
                     return;
-                }
 
                 int hash = value.GetHashCode();
 
@@ -198,9 +190,7 @@ namespace System.Drawing
             public int Add(object value)
             {
                 if (Count > RefCheckThreshold)
-                {
                     ScavengeReferences();
-                }
 
                 return InnerList.Add(CreateWeakRefObject(value));
             }

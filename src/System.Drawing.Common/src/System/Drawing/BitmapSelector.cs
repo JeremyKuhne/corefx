@@ -14,28 +14,14 @@ namespace System.Drawing
     {
         /// <summary>
         /// Gets the bitmap ID suffix defined in the application configuration, or string.Empty if
-        /// the suffix is not specified.  Internal for unit tests
+        /// the suffix is not specified.  Internal for unit tests.
         /// </summary>
         /// <remarks>
-        /// For performance, the suffix is cached in a static variable so it only has to be read
-        /// once per appdomain.
+        /// This value is read from the "SystemDrawingSection" of the ConfigurationManager on the
+        /// .NET Framework. To avoid pulling in a direct dependency to that assembly, we are not
+        /// reading the value in this implementation.
         /// </remarks>
-        private static string s_suffix;
-        internal static string Suffix
-        {
-            get
-            {
-                // NOTE: This value is read from the "SystemDrawingSection" of the ConfigurationManager on
-                // the .NET Framework. To avoid pulling in a direct dependency to that assembly, we are not
-                // reading the value in this implementation.
-                return s_suffix;
-            }
-            set
-            {
-                // So unit tests can clear the cached suffix
-                s_suffix = value;
-            }
-        }
+        internal static string Suffix { get; set; }
 
         /// <summary>
         /// Appends the current suffix to <paramref name="filePath"/>.  The suffix is appended
@@ -52,7 +38,8 @@ namespace System.Drawing
                 return Path.ChangeExtension(filePath, Suffix + Path.GetExtension(filePath));
             }
             catch (ArgumentException)
-            { // there are invalid characters in the path
+            {
+                // there are invalid characters in the path
                 return filePath;
             }
         }
@@ -108,9 +95,7 @@ namespace System.Drawing
         {
             // Try 4.5 public attribute type first
             if (DoesAssemblyHaveCustomAttribute(assembly, typeof(BitmapSuffixInSatelliteAssemblyAttribute)))
-            {
                 return true;
-            }
 
             // Also load attribute type by name for dlls compiled against older frameworks
             return DoesAssemblyHaveCustomAttribute(assembly, "System.Drawing.BitmapSuffixInSatelliteAssemblyAttribute");
@@ -121,9 +106,7 @@ namespace System.Drawing
         {
             // Try 4.5 public attribute type first
             if (DoesAssemblyHaveCustomAttribute(assembly, typeof(BitmapSuffixInSameAssemblyAttribute)))
-            {
                 return true;
-            }
 
             // Also load attribute type by name for dlls compiled against older frameworks
             return DoesAssemblyHaveCustomAttribute(assembly, "System.Drawing.BitmapSuffixInSameAssemblyAttribute");

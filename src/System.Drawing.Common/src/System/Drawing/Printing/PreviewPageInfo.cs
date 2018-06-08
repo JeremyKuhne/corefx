@@ -9,34 +9,23 @@ namespace System.Drawing.Printing
     /// </summary>
     public sealed class PreviewPageInfo
     {
-        private Image _image;
-
-        // Physical measures in hundredths of an inch
-        private Size _physicalSize = Size.Empty;
-
         /// <summary>
         /// Initializes a new instance of the <see cref='PreviewPageInfo'/> class.
         /// </summary>
         public PreviewPageInfo(Image image, Size physicalSize)
         {
-            _image = image;
-            _physicalSize = physicalSize;
+            Image = image;
+            PhysicalSize = physicalSize;
         }
 
         /// <summary>
         /// Gets the image of the printed page.
         /// </summary>
-        public Image Image
-        {
-            get { return _image; }
-        }
+        public Image Image { get; }
 
         /// <summary>
         /// Gets the size of the printed page, in hundredths of an inch.
         /// </summary>
-        public Size PhysicalSize
-        {
-            get { return _physicalSize; }
-        }
+        public Size PhysicalSize { get; } = Size.Empty;
     }
 }

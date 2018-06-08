@@ -7,7 +7,6 @@ using System.Drawing.Imaging;
 using System.Drawing.Internal;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Security.Permissions;
 
 namespace System.Drawing
 {
@@ -28,16 +27,10 @@ namespace System.Drawing
             filename = Path.GetFullPath(filename);
 
             IntPtr bitmap = IntPtr.Zero;
-            int status;
+            int status = useIcm
+                ? SafeNativeMethods.Gdip.GdipCreateBitmapFromFileICM(filename, out bitmap)
+                : SafeNativeMethods.Gdip.GdipCreateBitmapFromFile(filename, out bitmap);
 
-            if (useIcm)
-            {
-                status = SafeNativeMethods.Gdip.GdipCreateBitmapFromFileICM(filename, out bitmap);
-            }
-            else
-            {
-                status = SafeNativeMethods.Gdip.GdipCreateBitmapFromFile(filename, out bitmap);
-            }
             SafeNativeMethods.Gdip.CheckStatus(status);
 
             ValidateImage(bitmap);
@@ -55,9 +48,7 @@ namespace System.Drawing
         public Bitmap(int width, int height, Graphics g)
         {
             if (g == null)
-            {
                 throw new ArgumentNullException(nameof(g));
-            }
 
             IntPtr bitmap = IntPtr.Zero;
             int status = SafeNativeMethods.Gdip.GdipCreateBitmapFromGraphics(width, height, new HandleRef(g, g.NativeGraphics), out bitmap);
@@ -161,9 +152,7 @@ namespace System.Drawing
         public Bitmap Clone(RectangleF rect, PixelFormat format)
         {
             if (rect.Width == 0 || rect.Height == 0)
-            {
                 throw new ArgumentException(SR.Format(SR.GdiplusInvalidRectangle, rect.ToString()));
-            }
 
             IntPtr dstHandle = IntPtr.Zero;
 
@@ -202,9 +191,7 @@ namespace System.Drawing
         public void MakeTransparent(Color transparentColor)
         {
             if (RawFormat.Guid == ImageFormat.Icon.Guid)
-            {
                 throw new InvalidOperationException(SR.Format(SR.CantMakeIconTransparent));
-            }
 
             Size size = Size;
 
@@ -260,17 +247,11 @@ namespace System.Drawing
         public Color GetPixel(int x, int y)
         {
             if (x < 0 || x >= Width)
-            {
                 throw new ArgumentOutOfRangeException(nameof(x), SR.Format(SR.ValidRangeX));
-            }
-
             if (y < 0 || y >= Height)
-            {
                 throw new ArgumentOutOfRangeException(nameof(y), SR.Format(SR.ValidRangeY));
-            }
 
-            int color = 0;
-            int status = SafeNativeMethods.Gdip.GdipBitmapGetPixel(new HandleRef(this, nativeImage), x, y, out color);
+            int status = SafeNativeMethods.Gdip.GdipBitmapGetPixel(new HandleRef(this, nativeImage), x, y, out int color);
             SafeNativeMethods.Gdip.CheckStatus(status);
 
             return Color.FromArgb(color);
@@ -279,19 +260,11 @@ namespace System.Drawing
         public void SetPixel(int x, int y, Color color)
         {
             if ((PixelFormat & PixelFormat.Indexed) != 0)
-            {
                 throw new InvalidOperationException(SR.Format(SR.GdiplusCannotSetPixelFromIndexedPixelFormat));
-            }
-
             if (x < 0 || x >= Width)
-            {
                 throw new ArgumentOutOfRangeException(nameof(x), SR.Format(SR.ValidRangeX));
-            }
-
             if (y < 0 || y >= Height)
-            {
                 throw new ArgumentOutOfRangeException(nameof(y), SR.Format(SR.ValidRangeY));
-            }
 
             int status = SafeNativeMethods.Gdip.GdipBitmapSetPixel(new HandleRef(this, nativeImage), x, y, color.ToArgb());
             SafeNativeMethods.Gdip.CheckStatus(status);
@@ -302,12 +275,11 @@ namespace System.Drawing
             int status = SafeNativeMethods.Gdip.GdipBitmapSetResolution(new HandleRef(this, nativeImage), xDpi, yDpi);
             SafeNativeMethods.Gdip.CheckStatus(status);
         }
+
         public Bitmap Clone(Rectangle rect, PixelFormat format)
         {
             if (rect.Width == 0 || rect.Height == 0)
-            {
                 throw new ArgumentException(SR.Format(SR.GdiplusInvalidRectangle, rect.ToString()));
-            }
 
             IntPtr dstHandle = IntPtr.Zero;
             int status = SafeNativeMethods.Gdip.GdipCloneBitmapAreaI(

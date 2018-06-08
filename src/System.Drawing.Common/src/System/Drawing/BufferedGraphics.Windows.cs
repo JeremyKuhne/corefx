@@ -8,7 +8,6 @@ namespace System.Drawing
 {
     public sealed partial class BufferedGraphics
     {
-        private Graphics _bufferedGraphicsSurface;
         private BufferedGraphicsContext _context;
         private readonly Point _targetLoc;
         private readonly Size _virtualSize;
@@ -21,7 +20,7 @@ namespace System.Drawing
                                   IntPtr targetDC, Point targetLoc, Size virtualSize)
         {
             _context = context;
-            _bufferedGraphicsSurface = bufferedGraphicsSurface;
+            Graphics = bufferedGraphicsSurface;
             _targetDC = targetDC;
             _targetGraphics = targetGraphics;
             _targetLoc = targetLoc;
@@ -41,17 +40,17 @@ namespace System.Drawing
                 }
             }
 
-            if (_bufferedGraphicsSurface != null)
+            if (Graphics != null)
             {
-                _bufferedGraphicsSurface.Dispose();
-                _bufferedGraphicsSurface = null;
+                Graphics.Dispose();
+                Graphics = null;
             }
         }
 
         /// <summary>
         /// Allows access to the Graphics wrapper for the buffer.
         /// </summary>
-        public Graphics Graphics => _bufferedGraphicsSurface;
+        public Graphics Graphics { get; private set; }
 
         /// <summary>
         /// Renders the buffer to the specified target graphics.

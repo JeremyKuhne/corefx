@@ -42,22 +42,17 @@ namespace System.Drawing
         public static Color FromKnownColor(KnownColor color)
         {
             var value = (int)color;
-            if (value < (int)KnownColor.ActiveBorder || value > (int)KnownColor.MenuHighlight)
-            {
-                return FromName(color.ToString());
-            }
-
-            return (Color)s_ctorKnownColor.Invoke(new object[] { value });
+            return (value < (int)KnownColor.ActiveBorder || value > (int)KnownColor.MenuHighlight)
+                ? FromName(color.ToString())
+                : (Color)s_ctorKnownColor.Invoke(new object[] { value });
         }
 
         public static Color FromName(string name)
         {
             // try to get a known color first
-            Color color;
-            if (ColorTable.TryGetNamedColor(name, out color))
-            {
+            if (ColorTable.TryGetNamedColor(name, out Color color))
                 return color;
-            }
+
             // otherwise treat it as a named color
             return (Color)s_ctorAllValues.Invoke(new object[] { NotDefinedValue, StateNameValid, name, 0 });
         }

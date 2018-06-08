@@ -54,7 +54,7 @@ namespace System.Drawing.Printing
 
             // We need a DC as a reference; we don't actually draw on it.
             // We make sure to reuse the same one to improve performance.
-            _dc = document.PrinterSettings.CreateInformationContext(modeHandle);
+            _dc = document.PrinterSettings.CreateInformationContext(_modeHandle);
         }
 
         /// <summary>
@@ -71,7 +71,7 @@ namespace System.Drawing.Printing
 
             if (e.CopySettingsToDevMode)
             {
-                e.PageSettings.CopyToHdevmode(modeHandle);
+                e.PageSettings.CopyToHdevmode(_modeHandle);
             }
 
             Size size = e.PageBounds.Size;

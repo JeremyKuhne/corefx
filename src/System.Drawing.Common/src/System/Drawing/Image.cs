@@ -86,10 +86,8 @@ namespace System.Drawing
         {
             get
             {
-                float width;
-                float height;
 
-                int status = SafeNativeMethods.Gdip.GdipGetImageDimension(new HandleRef(this, nativeImage), out width, out height);
+                int status = SafeNativeMethods.Gdip.GdipGetImageDimension(new HandleRef(this, nativeImage), out float width, out float height);
                 SafeNativeMethods.Gdip.CheckStatus(status);
 
                 return new SizeF(width, height);
@@ -111,9 +109,8 @@ namespace System.Drawing
         {
             get
             {
-                int width;
 
-                int status = SafeNativeMethods.Gdip.GdipGetImageWidth(new HandleRef(this, nativeImage), out width);
+                int status = SafeNativeMethods.Gdip.GdipGetImageWidth(new HandleRef(this, nativeImage), out int width);
                 SafeNativeMethods.Gdip.CheckStatus(status);
 
                 return width;
@@ -130,9 +127,8 @@ namespace System.Drawing
         {
             get
             {
-                int height;
 
-                int status = SafeNativeMethods.Gdip.GdipGetImageHeight(new HandleRef(this, nativeImage), out height);
+                int status = SafeNativeMethods.Gdip.GdipGetImageHeight(new HandleRef(this, nativeImage), out int height);
                 SafeNativeMethods.Gdip.CheckStatus(status);
 
                 return height;
@@ -146,9 +142,8 @@ namespace System.Drawing
         {
             get
             {
-                float horzRes;
 
-                int status = SafeNativeMethods.Gdip.GdipGetImageHorizontalResolution(new HandleRef(this, nativeImage), out horzRes);
+                int status = SafeNativeMethods.Gdip.GdipGetImageHorizontalResolution(new HandleRef(this, nativeImage), out float horzRes);
                 SafeNativeMethods.Gdip.CheckStatus(status);
 
                 return horzRes;
@@ -162,9 +157,8 @@ namespace System.Drawing
         {
             get
             {
-                float vertRes;
 
-                int status = SafeNativeMethods.Gdip.GdipGetImageVerticalResolution(new HandleRef(this, nativeImage), out vertRes);
+                int status = SafeNativeMethods.Gdip.GdipGetImageVerticalResolution(new HandleRef(this, nativeImage), out float vertRes);
                 SafeNativeMethods.Gdip.CheckStatus(status);
 
                 return vertRes;
@@ -179,9 +173,8 @@ namespace System.Drawing
         {
             get
             {
-                int flags;
 
-                int status = SafeNativeMethods.Gdip.GdipGetImageFlags(new HandleRef(this, nativeImage), out flags);
+                int status = SafeNativeMethods.Gdip.GdipGetImageFlags(new HandleRef(this, nativeImage), out int flags);
                 SafeNativeMethods.Gdip.CheckStatus(status);
 
                 return flags;
@@ -211,9 +204,8 @@ namespace System.Drawing
         {
             get
             {
-                int format;
 
-                int status = SafeNativeMethods.Gdip.GdipGetImagePixelFormat(new HandleRef(this, nativeImage), out format);
+                int status = SafeNativeMethods.Gdip.GdipGetImagePixelFormat(new HandleRef(this, nativeImage), out int format);
 
                 if (status != SafeNativeMethods.Gdip.Ok)
                     return PixelFormat.Undefined;

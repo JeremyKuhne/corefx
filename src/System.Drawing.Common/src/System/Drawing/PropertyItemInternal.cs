@@ -74,13 +74,15 @@ namespace System.Drawing.Imaging
                     propcopy = (PropertyItemInternal)Marshal.PtrToStructure(propdata,
                                                   typeof(PropertyItemInternal));
 
-                    props[i] = new PropertyItem();
-                    props[i].Id = propcopy.id;
-                    props[i].Len = propcopy.len;
-                    props[i].Type = propcopy.type;
+                    props[i] = new PropertyItem
+                    {
+                        Id = propcopy.id,
+                        Len = propcopy.len,
+                        Type = propcopy.type,
 
-                    // this calls Marshal.Copy and creates a copy of the original memory into a byte array.
-                    props[i].Value = propcopy.Value;
+                        // this calls Marshal.Copy and creates a copy of the original memory into a byte array.
+                        Value = propcopy.Value
+                    };
 
                     propcopy.value = IntPtr.Zero;  // we dont actually own this memory so dont free it.
                 }
@@ -103,16 +105,14 @@ namespace System.Drawing.Imaging
             get
             {
                 if (len == 0)
-                {
                     return null;
-                }
 
                 byte[] bytes = new byte[len];
 
                 Marshal.Copy(value,
                              bytes,
                              0,
-                             (int)len);
+                             len);
                 return bytes;
             }
         }

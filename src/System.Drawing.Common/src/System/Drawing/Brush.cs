@@ -11,19 +11,14 @@ namespace System.Drawing
 {
     public abstract class Brush : MarshalByRefObject, ICloneable, IDisposable
     {
-#if FINALIZATION_WATCH
-        private string allocationSite = Graphics.GetAllocationStack();
-#endif
-        // Handle to native GDI+ brush object to be used on demand.
-        private IntPtr _nativeBrush;
-
         public abstract object Clone();
 
         protected internal void SetNativeBrush(IntPtr brush) => SetNativeBrushInternal(brush);
-        internal void SetNativeBrushInternal(IntPtr brush) => _nativeBrush = brush;
+        internal void SetNativeBrushInternal(IntPtr brush) => NativeBrush = brush;
 
+        // Handle to native GDI+ brush object to be used on demand.
         [Browsable(false), EditorBrowsable(EditorBrowsableState.Never)]
-        internal IntPtr NativeBrush => _nativeBrush;
+        internal IntPtr NativeBrush { get; private set; }
 
         public void Dispose()
         {
@@ -38,14 +33,14 @@ namespace System.Drawing
                 Debug.WriteLine("**********************\nDisposed through finalization:\n" + allocationSite);
 #endif
 
-            if (_nativeBrush != IntPtr.Zero)
+            if (NativeBrush != IntPtr.Zero)
             {
                 try
                 {
 #if DEBUG
                     int status =
 #endif
-                    SafeNativeMethods.Gdip.GdipDeleteBrush(new HandleRef(this, _nativeBrush));
+                    SafeNativeMethods.Gdip.GdipDeleteBrush(new HandleRef(this, NativeBrush));
 #if DEBUG
                     Debug.Assert(status == SafeNativeMethods.Gdip.Ok, "GDI+ returned an error status: " + status.ToString(CultureInfo.InvariantCulture));
 #endif
@@ -57,7 +52,7 @@ namespace System.Drawing
                 }
                 finally
                 {
-                    _nativeBrush = IntPtr.Zero;
+                    NativeBrush = IntPtr.Zero;
                 }
             }
         }

@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using System.Globalization;
-using System.Reflection;
 
 namespace System.Drawing
 {
@@ -18,25 +17,16 @@ namespace System.Drawing
             string text = strValue.Trim();
 
             if (text.Length == 0)
-            {
                 return Color.Empty;
-            }
 
-            {
-                Color c;
-                // First, check to see if this is a standard name.
-                //
-                if (ColorTable.TryGetNamedColor(text, out c))
-                {
-                    return c;
-                }
-            }
+            // First, check to see if this is a standard name.
+            if (ColorTable.TryGetNamedColor(text, out Color c))
+                return c;
 
             char sep = culture.TextInfo.ListSeparator[0];
 
             // If the value is a 6 digit hex number only, then
             // we want to treat the Alpha as 255, not 0
-            //
             if (text.IndexOf(sep) == -1)
             {
                 // text can be '' (empty quoted string)
@@ -56,7 +46,6 @@ namespace System.Drawing
             }
 
             // Nope.  Parse the RGBA from the text.
-            //
             string[] tokens = text.Split(sep);
             int[] values = new int[tokens.Length];
             for (int i = 0; i < values.Length; i++)
@@ -70,7 +59,6 @@ namespace System.Drawing
             // 1 -- full ARGB encoded
             // 3 -- RGB
             // 4 -- ARGB
-            //
             switch (values.Length)
             {
                 case 1:
@@ -91,7 +79,6 @@ namespace System.Drawing
             // Now check to see if this color matches one of our known colors.
             // If it does, then substitute it.  We can only do this for "Colors"
             // because system colors morph with user settings.
-            //
             int targetARGB = color.ToArgb();
 
             foreach (Color c in ColorTable.Colors.Values)
@@ -139,7 +126,7 @@ namespace System.Drawing
 
         private static int IntFromString(string value, NumberFormatInfo formatInfo)
         {
-            return Int32.Parse(value, NumberStyles.Integer, formatInfo);
+            return int.Parse(value, NumberStyles.Integer, formatInfo);
         }
     }
 }

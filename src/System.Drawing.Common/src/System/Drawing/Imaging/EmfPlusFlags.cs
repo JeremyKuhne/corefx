@@ -4,9 +4,9 @@
 
 namespace System.Drawing.Imaging
 {
-    /**
-     * EMF+ Flags
-     */
+    /// <summary>
+    /// EMF+ Flags
+    /// </summary>
     internal enum EmfPlusFlags
     {
         Display = 0x00000001,

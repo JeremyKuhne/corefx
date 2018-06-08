@@ -35,22 +35,19 @@ namespace System.Drawing.Text
         {
             get
             {
-                int numSought = 0;
-                int status = SafeNativeMethods.Gdip.GdipGetFontCollectionFamilyCount(new HandleRef(this, _nativeFontCollection), out numSought);
+                int status = SafeNativeMethods.Gdip.GdipGetFontCollectionFamilyCount(new HandleRef(this, _nativeFontCollection), out int numSought);
                 SafeNativeMethods.Gdip.CheckStatus(status);
 
                 var gpfamilies = new IntPtr[numSought];
-                int numFound = 0;
                 status = SafeNativeMethods.Gdip.GdipGetFontCollectionFamilyList(new HandleRef(this, _nativeFontCollection), numSought, gpfamilies,
-                                                             out numFound);
+                                                             out int numFound);
                 SafeNativeMethods.Gdip.CheckStatus(status);
 
                 Debug.Assert(numSought == numFound, "GDI+ can't give a straight answer about how many fonts there are");
                 var families = new FontFamily[numFound];
                 for (int f = 0; f < numFound; f++)
                 {
-                    IntPtr native;
-                    SafeNativeMethods.Gdip.GdipCloneFontFamily(new HandleRef(null, gpfamilies[f]), out native);
+                    SafeNativeMethods.Gdip.GdipCloneFontFamily(new HandleRef(null, gpfamilies[f]), out IntPtr native);
                     families[f] = new FontFamily(native);
                 }
 

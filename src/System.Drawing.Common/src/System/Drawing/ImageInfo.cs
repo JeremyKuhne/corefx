@@ -19,33 +19,25 @@ namespace System.Drawing
         private class ImageInfo
         {
             private const int PropertyTagFrameDelay = 0x5100;
-
-            private Image _image;
             private int _frame;
-            private int _frameCount;
-            private bool _frameDirty;
-            private bool _animated;
-            private EventHandler _onFrameChangedHandler;
-            private int[] _frameDelay;
-            private int _frameTimer;
+            private readonly int[] _frameDelay;
 
             public ImageInfo(Image image)
             {
-                _image = image;
-                _animated = ImageAnimator.CanAnimate(image);
+                Image = image;
+                Animated = CanAnimate(image);
 
-                if (_animated)
+                if (Animated)
                 {
-                    _frameCount = image.GetFrameCount(FrameDimension.Time);
+                    FrameCount = image.GetFrameCount(FrameDimension.Time);
 
                     PropertyItem frameDelayItem = image.GetPropertyItem(PropertyTagFrameDelay);
 
-                    // If the image does not have a frame delay, we just return 0.                                     
+                    // If the image does not have a frame delay, we just return 0.
                     //
                     if (frameDelayItem != null)
                     {
                         // Convert the frame delay from byte[] to int
-                        //
                         byte[] values = frameDelayItem.Value;
                         Debug.Assert(values.Length == 4 * FrameCount, "PropertyItem has invalid value byte array");
                         _frameDelay = new int[FrameCount];
@@ -57,7 +49,7 @@ namespace System.Drawing
                 }
                 else
                 {
-                    _frameCount = 1;
+                    FrameCount = 1;
                 }
                 if (_frameDelay == null)
                 {
@@ -68,13 +60,7 @@ namespace System.Drawing
             /// <summary>
             /// Whether the image supports animation.
             /// </summary>
-            public bool Animated
-            {
-                get
-                {
-                    return _animated;
-                }
-            }
+            public bool Animated { get; }
 
             /// <summary>
             /// The current frame.
@@ -91,13 +77,13 @@ namespace System.Drawing
                     {
                         if (value < 0 || value >= FrameCount)
                         {
-                            throw new ArgumentException(SR.Format(SR.InvalidFrame), "value");
+                            throw new ArgumentException(SR.Format(SR.InvalidFrame), nameof(value));
                         }
 
                         if (Animated)
                         {
                             _frame = value;
-                            _frameDirty = true;
+                            FrameDirty = true;
 
                             OnFrameChanged(EventArgs.Empty);
                         }
@@ -108,90 +94,43 @@ namespace System.Drawing
             /// <summary>
             /// The current frame has not been updated.
             /// </summary>
-            public bool FrameDirty
-            {
-                get
-                {
-                    return _frameDirty;
-                }
-            }
+            public bool FrameDirty { get; private set; }
 
-            public EventHandler FrameChangedHandler
-            {
-                get
-                {
-                    return _onFrameChangedHandler;
-                }
-                set
-                {
-                    _onFrameChangedHandler = value;
-                }
-            }
+            public EventHandler FrameChangedHandler { get; set; }
 
             /// <summary>
             /// The number of frames in the image.
             /// </summary>
-            public int FrameCount
-            {
-                get
-                {
-                    return _frameCount;
-                }
-            }
+            public int FrameCount { get; }
 
             /// <summary>
             /// The delay associated with the frame at the specified index.
             /// </summary>
-            public int FrameDelay(int frame)
-            {
-                return _frameDelay[frame];
-            }
+            public int FrameDelay(int frame) => _frameDelay[frame];
 
-            internal int FrameTimer
-            {
-                get
-                {
-                    return _frameTimer;
-                }
-                set
-                {
-                    _frameTimer = value;
-                }
-            }
+            internal int FrameTimer { get; set; }
 
             /// <summary>
             /// The image this object wraps.
             /// </summary>
-            internal Image Image
-            {
-                get
-                {
-                    return _image;
-                }
-            }
+            internal Image Image { get; }
 
             /// <summary>
             /// Selects the current frame as the active frame in the image.
             /// </summary>
             internal void UpdateFrame()
             {
-                if (_frameDirty)
+                if (FrameDirty)
                 {
-                    _image.SelectActiveFrame(FrameDimension.Time, Frame);
-                    _frameDirty = false;
+                    Image.SelectActiveFrame(FrameDimension.Time, Frame);
+                    FrameDirty = false;
                 }
             }
 
             /// <summary>
             /// Raises the FrameChanged event.
             /// </summary>
-            protected void OnFrameChanged(EventArgs e)
-            {
-                if (_onFrameChangedHandler != null)
-                {
-                    _onFrameChangedHandler(_image, e);
-                }
-            }
+            protected void OnFrameChanged(EventArgs e) => FrameChangedHandler?.Invoke(Image, e);
         }
     }
 }

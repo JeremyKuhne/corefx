@@ -9,33 +9,22 @@ namespace System.Drawing.Imaging
     /// </summary>
     public sealed class ColorMap
     {
-        private Color _oldColor;
-        private Color _newColor;
-
         /// <summary>
         /// Initializes a new instance of the <see cref='ColorMap'/> class.
         /// </summary>
         public ColorMap()
         {
-            _oldColor = new Color();
-            _newColor = new Color();
+            OldColor = new Color();
+            NewColor = new Color();
         }
 
         /// <summary>
         /// Specifies the existing <see cref='Color'/> to be converted.
         /// </summary>
-        public Color OldColor
-        {
-            get { return _oldColor; }
-            set { _oldColor = value; }
-        }
+        public Color OldColor { get; set; }
         /// <summary>
         /// Specifies the new <see cref='Color'/> to which to convert.
         /// </summary>
-        public Color NewColor
-        {
-            get { return _newColor; }
-            set { _newColor = value; }
-        }
+        public Color NewColor { get; set; }
     }
 }

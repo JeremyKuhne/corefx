@@ -224,9 +224,9 @@ namespace System.Drawing
                 }
                 else
                 {
-                    string r = Char.ToString(htmlColor[1]);
-                    string g = Char.ToString(htmlColor[2]);
-                    string b = Char.ToString(htmlColor[3]);
+                    string r = char.ToString(htmlColor[1]);
+                    string g = char.ToString(htmlColor[2]);
+                    string b = char.ToString(htmlColor[3]);
 
                     c = Color.FromArgb(Convert.ToInt32(r + r, 16),
                                        Convert.ToInt32(g + g, 16),
@@ -235,7 +235,7 @@ namespace System.Drawing
             }
 
             // special case. Html requires LightGrey, but .NET uses LightGray
-            if (c.IsEmpty && String.Equals(htmlColor, "LightGrey", StringComparison.OrdinalIgnoreCase))
+            if (c.IsEmpty && string.Equals(htmlColor, "LightGrey", StringComparison.OrdinalIgnoreCase))
             {
                 c = Color.LightGray;
             }
@@ -276,7 +276,7 @@ namespace System.Drawing
         /// </summary>
         public static string ToHtml(Color c)
         {
-            string colorString = String.Empty;
+            string colorString = string.Empty;
 
             if (c.IsEmpty)
                 return colorString;
@@ -391,34 +391,36 @@ namespace System.Drawing
 
         private static void InitializeHtmlSysColorTable()
         {
-            s_htmlSysColorTable = new Hashtable(26);
-            s_htmlSysColorTable["activeborder"] = ColorUtil.FromKnownColor(KnownColor.ActiveBorder);
-            s_htmlSysColorTable["activecaption"] = ColorUtil.FromKnownColor(KnownColor.ActiveCaption);
-            s_htmlSysColorTable["appworkspace"] = ColorUtil.FromKnownColor(KnownColor.AppWorkspace);
-            s_htmlSysColorTable["background"] = ColorUtil.FromKnownColor(KnownColor.Desktop);
-            s_htmlSysColorTable["buttonface"] = ColorUtil.FromKnownColor(KnownColor.Control);
-            s_htmlSysColorTable["buttonhighlight"] = ColorUtil.FromKnownColor(KnownColor.ControlLightLight);
-            s_htmlSysColorTable["buttonshadow"] = ColorUtil.FromKnownColor(KnownColor.ControlDark);
-            s_htmlSysColorTable["buttontext"] = ColorUtil.FromKnownColor(KnownColor.ControlText);
-            s_htmlSysColorTable["captiontext"] = ColorUtil.FromKnownColor(KnownColor.ActiveCaptionText);
-            s_htmlSysColorTable["graytext"] = ColorUtil.FromKnownColor(KnownColor.GrayText);
-            s_htmlSysColorTable["highlight"] = ColorUtil.FromKnownColor(KnownColor.Highlight);
-            s_htmlSysColorTable["highlighttext"] = ColorUtil.FromKnownColor(KnownColor.HighlightText);
-            s_htmlSysColorTable["inactiveborder"] = ColorUtil.FromKnownColor(KnownColor.InactiveBorder);
-            s_htmlSysColorTable["inactivecaption"] = ColorUtil.FromKnownColor(KnownColor.InactiveCaption);
-            s_htmlSysColorTable["inactivecaptiontext"] = ColorUtil.FromKnownColor(KnownColor.InactiveCaptionText);
-            s_htmlSysColorTable["infobackground"] = ColorUtil.FromKnownColor(KnownColor.Info);
-            s_htmlSysColorTable["infotext"] = ColorUtil.FromKnownColor(KnownColor.InfoText);
-            s_htmlSysColorTable["menu"] = ColorUtil.FromKnownColor(KnownColor.Menu);
-            s_htmlSysColorTable["menutext"] = ColorUtil.FromKnownColor(KnownColor.MenuText);
-            s_htmlSysColorTable["scrollbar"] = ColorUtil.FromKnownColor(KnownColor.ScrollBar);
-            s_htmlSysColorTable["threeddarkshadow"] = ColorUtil.FromKnownColor(KnownColor.ControlDarkDark);
-            s_htmlSysColorTable["threedface"] = ColorUtil.FromKnownColor(KnownColor.Control);
-            s_htmlSysColorTable["threedhighlight"] = ColorUtil.FromKnownColor(KnownColor.ControlLight);
-            s_htmlSysColorTable["threedlightshadow"] = ColorUtil.FromKnownColor(KnownColor.ControlLightLight);
-            s_htmlSysColorTable["window"] = ColorUtil.FromKnownColor(KnownColor.Window);
-            s_htmlSysColorTable["windowframe"] = ColorUtil.FromKnownColor(KnownColor.WindowFrame);
-            s_htmlSysColorTable["windowtext"] = ColorUtil.FromKnownColor(KnownColor.WindowText);
+            s_htmlSysColorTable = new Hashtable(26)
+            {
+                ["activeborder"] = ColorUtil.FromKnownColor(KnownColor.ActiveBorder),
+                ["activecaption"] = ColorUtil.FromKnownColor(KnownColor.ActiveCaption),
+                ["appworkspace"] = ColorUtil.FromKnownColor(KnownColor.AppWorkspace),
+                ["background"] = ColorUtil.FromKnownColor(KnownColor.Desktop),
+                ["buttonface"] = ColorUtil.FromKnownColor(KnownColor.Control),
+                ["buttonhighlight"] = ColorUtil.FromKnownColor(KnownColor.ControlLightLight),
+                ["buttonshadow"] = ColorUtil.FromKnownColor(KnownColor.ControlDark),
+                ["buttontext"] = ColorUtil.FromKnownColor(KnownColor.ControlText),
+                ["captiontext"] = ColorUtil.FromKnownColor(KnownColor.ActiveCaptionText),
+                ["graytext"] = ColorUtil.FromKnownColor(KnownColor.GrayText),
+                ["highlight"] = ColorUtil.FromKnownColor(KnownColor.Highlight),
+                ["highlighttext"] = ColorUtil.FromKnownColor(KnownColor.HighlightText),
+                ["inactiveborder"] = ColorUtil.FromKnownColor(KnownColor.InactiveBorder),
+                ["inactivecaption"] = ColorUtil.FromKnownColor(KnownColor.InactiveCaption),
+                ["inactivecaptiontext"] = ColorUtil.FromKnownColor(KnownColor.InactiveCaptionText),
+                ["infobackground"] = ColorUtil.FromKnownColor(KnownColor.Info),
+                ["infotext"] = ColorUtil.FromKnownColor(KnownColor.InfoText),
+                ["menu"] = ColorUtil.FromKnownColor(KnownColor.Menu),
+                ["menutext"] = ColorUtil.FromKnownColor(KnownColor.MenuText),
+                ["scrollbar"] = ColorUtil.FromKnownColor(KnownColor.ScrollBar),
+                ["threeddarkshadow"] = ColorUtil.FromKnownColor(KnownColor.ControlDarkDark),
+                ["threedface"] = ColorUtil.FromKnownColor(KnownColor.Control),
+                ["threedhighlight"] = ColorUtil.FromKnownColor(KnownColor.ControlLight),
+                ["threedlightshadow"] = ColorUtil.FromKnownColor(KnownColor.ControlLightLight),
+                ["window"] = ColorUtil.FromKnownColor(KnownColor.Window),
+                ["windowframe"] = ColorUtil.FromKnownColor(KnownColor.WindowFrame),
+                ["windowtext"] = ColorUtil.FromKnownColor(KnownColor.WindowText)
+            };
         }
     }
 }

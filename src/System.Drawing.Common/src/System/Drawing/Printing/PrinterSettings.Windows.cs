@@ -26,12 +26,6 @@ namespace System.Drawing.Printing
         private const int Padding64Bit = 4;
 
         private string _printerName; // default printer.
-        private string _driverName = "";
-        private string _outputPort = "";
-        private bool _printToFile;
-
-        // Whether the PrintDialog has been shown (not whether it's currently shown).  This is how we enforce SafePrinting.
-        private bool _printDialogDisplayed;
 
         private short _extrabytes;
         private byte[] _extrainfo;
@@ -39,7 +33,6 @@ namespace System.Drawing.Printing
         private short _copies = -1;
         private Duplex _duplex = System.Drawing.Printing.Duplex.Default;
         private TriState _collate = TriState.Default;
-        private PageSettings _defaultPageSettings;
         private int _fromPage;
         private int _toPage;
         private int _maxPage = 9999;
@@ -54,42 +47,30 @@ namespace System.Drawing.Printing
         /// </summary>
         public PrinterSettings()
         {
-            _defaultPageSettings = new PageSettings(this);
+            DefaultPageSettings = new PageSettings(this);
         }
 
         /// <summary>
         /// Gets a value indicating whether the printer supports duplex (double-sided) printing.
         /// </summary>
         public bool CanDuplex
-        {
-            get { return DeviceCapabilities(SafeNativeMethods.DC_DUPLEX, IntPtr.Zero, 0) == 1; }
-        }
+            => DeviceCapabilities(SafeNativeMethods.DC_DUPLEX, IntPtr.Zero, 0) == 1;
 
         /// <summary>
         /// Gets or sets the number of copies to print.
         /// </summary>
         public short Copies
         {
-            get
-            {
-                if (_copies != -1)
-                    return _copies;
-                else
-                    return GetModeField(ModeField.Copies, 1);
-            }
+            get => _copies != -1
+                ? _copies
+                : GetModeField(ModeField.Copies, 1);
             set
             {
                 if (value < 0)
-                    throw new ArgumentException(SR.Format(SR.InvalidLowBoundArgumentEx,
-                                                             "value", value.ToString(CultureInfo.CurrentCulture),
-                                                             (0).ToString(CultureInfo.CurrentCulture)));
-                /*
-                    We shouldnt allow copies to be set since the copies can be a large number 
-                    and can be reflected in PrintDialog. So for the Copies property,
-                    we prefer that for SafePrinting, copied cannot be set programmatically 
-                    but through the print dialog. 
-                    Any lower security could set copies to anything.
-                */
+                    throw new ArgumentException(SR.Format(
+                        SR.InvalidLowBoundArgumentEx,
+                        nameof(value), value.ToString(CultureInfo.CurrentCulture), (0).ToString(CultureInfo.CurrentCulture)));
+
                 _copies = value;
             }
         }
@@ -99,51 +80,33 @@ namespace System.Drawing.Printing
         /// </summary>
         public bool Collate
         {
-            get
-            {
-                if (!_collate.IsDefault)
-                    return (bool)_collate;
-                else
-                    return GetModeField(ModeField.Collate, SafeNativeMethods.DMCOLLATE_FALSE) == SafeNativeMethods.DMCOLLATE_TRUE;
-            }
-            set { _collate = value; }
+            get => !_collate.IsDefault
+                ? (bool)_collate
+                : GetModeField(ModeField.Collate, SafeNativeMethods.DMCOLLATE_FALSE) == SafeNativeMethods.DMCOLLATE_TRUE;
+            set => _collate = value;
         }
 
         /// <summary>
         /// Gets the default page settings for this printer.
         /// </summary>
-        public PageSettings DefaultPageSettings
-        {
-            get { return _defaultPageSettings; }
-        }
+        public PageSettings DefaultPageSettings { get; }
 
         // As far as I can tell, Windows no longer pays attention to driver names and output ports.
         // But I'm leaving this code in place in case I'm wrong.
-        internal string DriverName
-        {
-            get { return _driverName; }
-        }
+        internal string DriverName { get; private set; } = "";
 
         /// <summary>
         /// Gets or sets the printer's duplex setting.
         /// </summary>
         public Duplex Duplex
         {
-            get
-            {
-                if (_duplex != Duplex.Default)
-                {
-                    return _duplex;
-                }
-
-                return (Duplex)GetModeField(ModeField.Duplex, SafeNativeMethods.DMDUP_SIMPLEX);
-            }
+            get => _duplex != Duplex.Default
+                ? _duplex
+                : (Duplex)GetModeField(ModeField.Duplex, SafeNativeMethods.DMDUP_SIMPLEX);
             set
             {
                 if (value < Duplex.Default || value > Duplex.Horizontal)
-                {
                     throw new InvalidEnumArgumentException(nameof(value), unchecked((int)value), typeof(Duplex));
-                }
 
                 _duplex = value;
             }
@@ -154,18 +117,16 @@ namespace System.Drawing.Printing
         /// </summary>
         public int FromPage
         {
-            get { return _fromPage; }
+            get => _fromPage;
             set
             {
                 if (value < 0)
-                    throw new ArgumentException(SR.Format(SR.InvalidLowBoundArgumentEx,
-                                                             "value", value.ToString(CultureInfo.CurrentCulture),
-                                                             (0).ToString(CultureInfo.CurrentCulture)));
+                    throw new ArgumentException(SR.Format(
+                        SR.InvalidLowBoundArgumentEx,
+                        nameof(value), value.ToString(CultureInfo.CurrentCulture), (0).ToString(CultureInfo.CurrentCulture)));
                 _fromPage = value;
             }
         }
-
-
 
         /// <summary>
         /// Gets the names of all printers installed on the machine.
@@ -186,10 +147,7 @@ namespace System.Drawing.Printing
                 {
                     sizeofstruct = (IntPtr.Size * 2) + (Marshal.SizeOf(typeof(int)) * 1);
                 }
-
-                int bufferSize;
-                int count;
-                SafeNativeMethods.EnumPrinters(SafeNativeMethods.PRINTER_ENUM_LOCAL | SafeNativeMethods.PRINTER_ENUM_CONNECTIONS, null, Level, IntPtr.Zero, 0, out bufferSize, out count);
+                SafeNativeMethods.EnumPrinters(SafeNativeMethods.PRINTER_ENUM_LOCAL | SafeNativeMethods.PRINTER_ENUM_CONNECTIONS, null, Level, IntPtr.Zero, 0, out int bufferSize, out int count);
 
                 IntPtr buffer = Marshal.AllocCoTaskMem(bufferSize);
                 int returnCode = SafeNativeMethods.EnumPrinters(SafeNativeMethods.PRINTER_ENUM_LOCAL | SafeNativeMethods.PRINTER_ENUM_CONNECTIONS,
@@ -207,7 +165,7 @@ namespace System.Drawing.Printing
                 {
                     // The printer name is at offset 0
                     //
-                    IntPtr namePointer = (IntPtr)Marshal.ReadIntPtr((IntPtr)(checked((long)buffer + i * sizeofstruct)));
+                    IntPtr namePointer = Marshal.ReadIntPtr((IntPtr)(checked((long)buffer + i * sizeofstruct)));
                     array[i] = Marshal.PtrToStringAuto(namePointer);
                 }
 
@@ -221,63 +179,44 @@ namespace System.Drawing.Printing
         /// Gets a value indicating whether the <see cref='PrinterName'/> property designates the default printer.
         /// </summary>
         public bool IsDefaultPrinter
-        {
-            get
-            {
-                return (_printerName == null || _printerName == GetDefaultPrinterName());
-            }
-        }
+            => _printerName == null || _printerName == GetDefaultPrinterName();
 
         /// <summary>
         /// Gets a value indicating whether the printer is a plotter, as opposed to a raster printer.
         /// </summary>
         public bool IsPlotter
-        {
-            get
-            {
-                return GetDeviceCaps(SafeNativeMethods.TECHNOLOGY, SafeNativeMethods.DT_RASPRINTER) == SafeNativeMethods.DT_PLOTTER;
-            }
-        }
+            => GetDeviceCaps(SafeNativeMethods.TECHNOLOGY, SafeNativeMethods.DT_RASPRINTER) == SafeNativeMethods.DT_PLOTTER;
 
         /// <summary>
         /// Gets a value indicating whether the <see cref='PrinterName'/> property designates a valid printer.
         /// </summary>
         public bool IsValid
-        {
-            get
-            {
-                return DeviceCapabilities(SafeNativeMethods.DC_COPIES, IntPtr.Zero, -1) != -1;
-            }
-        }
+            => DeviceCapabilities(SafeNativeMethods.DC_COPIES, IntPtr.Zero, -1) != -1;
 
         /// <summary>
         /// Gets the angle, in degrees, which the portrait orientation is rotated to produce the landscape orientation.
         /// </summary>
         public int LandscapeAngle
-        {
-            get { return DeviceCapabilities(SafeNativeMethods.DC_ORIENTATION, IntPtr.Zero, 0); }
-        }
+            => DeviceCapabilities(SafeNativeMethods.DC_ORIENTATION, IntPtr.Zero, 0);
 
         /// <summary>
         /// Gets the maximum number of copies allowed by the printer.
         /// </summary>
         public int MaximumCopies
-        {
-            get { return DeviceCapabilities(SafeNativeMethods.DC_COPIES, IntPtr.Zero, 1); }
-        }
+            => DeviceCapabilities(SafeNativeMethods.DC_COPIES, IntPtr.Zero, 1);
 
         /// <summary>
         /// Gets or sets the highest <see cref='FromPage'/> or <see cref='ToPage'/> which may be selected in a print dialog box.
         /// </summary>
         public int MaximumPage
         {
-            get { return _maxPage; }
+            get => _maxPage;
             set
             {
                 if (value < 0)
-                    throw new ArgumentException(SR.Format(SR.InvalidLowBoundArgumentEx,
-                                                             "value", value.ToString(CultureInfo.CurrentCulture),
-                                                             (0).ToString(CultureInfo.CurrentCulture)));
+                    throw new ArgumentException(SR.Format(
+                        SR.InvalidLowBoundArgumentEx,
+                        nameof(value), value.ToString(CultureInfo.CurrentCulture), (0).ToString(CultureInfo.CurrentCulture)));
                 _maxPage = value;
             }
         }
@@ -287,7 +226,7 @@ namespace System.Drawing.Printing
         /// </summary>
         public int MinimumPage
         {
-            get { return _minPage; }
+            get => _minPage;
             set
             {
                 if (value < 0)
@@ -298,17 +237,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        internal string OutputPort
-        {
-            get
-            {
-                return _outputPort;
-            }
-            set
-            {
-                _outputPort = value;
-            }
-        }
+        internal string OutputPort { get; set; } = "";
 
         /// <summary>
         /// Indicates the name of the printerfile.
@@ -323,9 +252,8 @@ namespace System.Drawing.Printing
             set
             {
                 if (string.IsNullOrEmpty(value))
-                {
-                    throw new ArgumentNullException(value);
-                }
+                    throw new ArgumentNullException(nameof(value));
+
                 OutputPort = value;
             }
         }
@@ -333,47 +261,30 @@ namespace System.Drawing.Printing
         /// <summary>
         /// Gets the paper sizes supported by this printer.
         /// </summary>
-        public PaperSizeCollection PaperSizes
-        {
-            get { return new PaperSizeCollection(Get_PaperSizes()); }
-        }
+        public PaperSizeCollection PaperSizes => new PaperSizeCollection(Get_PaperSizes());
 
         /// <summary>
         /// Gets the paper sources available on this printer.
         /// </summary>
-        public PaperSourceCollection PaperSources
-        {
-            get { return new PaperSourceCollection(Get_PaperSources()); }
-        }
+        public PaperSourceCollection PaperSources => new PaperSourceCollection(Get_PaperSources());
 
         /// <summary>
         /// Whether the print dialog has been displayed.  In SafePrinting mode, a print dialog is required to print.
         /// After printing, this property is set to false if the program does not have AllPrinting; this guarantees
         /// a document is only printed once each time the print dialog is shown.
         /// </summary>
-        internal bool PrintDialogDisplayed
-        {
-            get
-            {
-                return _printDialogDisplayed;
-            }
-
-            set
-            {
-                _printDialogDisplayed = value;
-            }
-        }
+        internal bool PrintDialogDisplayed { get; set; }
 
         /// <summary>
         /// Gets or sets the pages the user has asked to print.
         /// </summary>
         public PrintRange PrintRange
         {
-            get { return _printRange; }
+            get => _printRange;
             set
             {
                 if (!Enum.IsDefined(typeof(PrintRange), value))
-                    throw new InvalidEnumArgumentException("value", unchecked((int)value), typeof(PrintRange));
+                    throw new InvalidEnumArgumentException(nameof(value), unchecked((int)value), typeof(PrintRange));
 
                 _printRange = value;
             }
@@ -382,32 +293,15 @@ namespace System.Drawing.Printing
         /// <summary>
         /// Indicates whether to print to a file instead of a port.
         /// </summary>
-        public bool PrintToFile
-        {
-            get
-            {
-                return _printToFile;
-            }
-            set
-            {
-                _printToFile = value;
-            }
-        }
+        public bool PrintToFile { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the printer.
         /// </summary>
         public string PrinterName
         {
-            get
-            {
-                return PrinterNameInternal;
-            }
-
-            set
-            {
-                PrinterNameInternal = value;
-            }
+            get => PrinterNameInternal;
+            set => PrinterNameInternal = value;
         }
 
         private string PrinterNameInternal
@@ -425,19 +319,16 @@ namespace System.Drawing.Printing
                 _cachedDevmode = null;
                 _extrainfo = null;
                 _printerName = value;
+
                 // PrinterName can be set through a fulltrusted assembly without using  the PrintDialog. 
                 // So dont set this variable here.
-                //PrintDialogDisplayed = true;
             }
         }
 
         /// <summary>
         /// Gets the resolutions supported by this printer.
         /// </summary>
-        public PrinterResolutionCollection PrinterResolutions
-        {
-            get { return new PrinterResolutionCollection(Get_PrinterResolutions()); }
-        }
+        public PrinterResolutionCollection PrinterResolutions => new PrinterResolutionCollection(Get_PrinterResolutions());
 
         /// <summary>
         /// If the image is a JPEG or a PNG (Image.RawFormat) and the printer returns true from
@@ -519,26 +410,20 @@ namespace System.Drawing.Printing
         /// <summary>
         /// Gets a value indicating whether the printer supports color printing.
         /// </summary>
-        public bool SupportsColor
-        {
-            get
-            {
-                return GetDeviceCaps(SafeNativeMethods.BITSPIXEL, 1) > 1;
-            }
-        }
+        public bool SupportsColor => GetDeviceCaps(SafeNativeMethods.BITSPIXEL, 1) > 1;
 
         /// <summary>
         /// Gets or sets the last page to print.
         /// </summary>
         public int ToPage
         {
-            get { return _toPage; }
+            get => _toPage;
             set
             {
                 if (value < 0)
-                    throw new ArgumentException(SR.Format(SR.InvalidLowBoundArgumentEx,
-                                                             "value", value.ToString(CultureInfo.CurrentCulture),
-                                                             (0).ToString(CultureInfo.CurrentCulture)));
+                    throw new ArgumentException(SR.Format(
+                        SR.InvalidLowBoundArgumentEx,
+                        nameof(value), value.ToString(CultureInfo.CurrentCulture), (0).ToString(CultureInfo.CurrentCulture)));
                 _toPage = value;
             }
         }
@@ -549,10 +434,10 @@ namespace System.Drawing.Printing
         public object Clone()
         {
             PrinterSettings clone = (PrinterSettings)MemberwiseClone();
-            clone._printDialogDisplayed = false;
+            clone.PrintDialogDisplayed = false;
             return clone;
         }
-        // what is done in copytohdevmode cannot give unwanted access AllPrinting permission
+
         internal DeviceContext CreateDeviceContext(PageSettings pageSettings)
         {
             IntPtr modeHandle = GetHdevmodeInternal();
@@ -560,7 +445,7 @@ namespace System.Drawing.Printing
 
             try
             {
-                //Copy the PageSettings to the DEVMODE...
+                // Copy the PageSettings to the DEVMODE...
                 pageSettings.CopyToHdevmode(modeHandle);
                 dc = CreateDeviceContext(modeHandle);
             }
@@ -608,10 +493,7 @@ namespace System.Drawing.Printing
             return dc;
         }
 
-        public Graphics CreateMeasurementGraphics()
-        {
-            return CreateMeasurementGraphics(DefaultPageSettings);
-        }
+        public Graphics CreateMeasurementGraphics() => CreateMeasurementGraphics(DefaultPageSettings);
 
         //whatever the call stack calling HardMarginX and HardMarginY here is safe
         public Graphics CreateMeasurementGraphics(bool honorOriginAtMargins)
@@ -619,8 +501,8 @@ namespace System.Drawing.Printing
             Graphics g = CreateMeasurementGraphics();
             if (g != null && honorOriginAtMargins)
             {
-                g.TranslateTransform(-_defaultPageSettings.HardMarginX, -_defaultPageSettings.HardMarginY);
-                g.TranslateTransform(_defaultPageSettings.Margins.Left, _defaultPageSettings.Margins.Top);
+                g.TranslateTransform(-DefaultPageSettings.HardMarginX, -DefaultPageSettings.HardMarginY);
+                g.TranslateTransform(DefaultPageSettings.Margins.Left, DefaultPageSettings.Margins.Top);
             }
             return g;
         }
@@ -646,17 +528,18 @@ namespace System.Drawing.Printing
             return g;
         }
 
-
         // Create a PRINTDLG with a few useful defaults.
         // Try to keep this consistent with PrintDialog.CreatePRINTDLG.
         private static SafeNativeMethods.PRINTDLGX86 CreatePRINTDLGX86()
         {
-            SafeNativeMethods.PRINTDLGX86 data = new SafeNativeMethods.PRINTDLGX86();
-            data.lStructSize = Marshal.SizeOf(typeof(SafeNativeMethods.PRINTDLGX86));
-            data.hwndOwner = IntPtr.Zero;
-            data.hDevMode = IntPtr.Zero;
-            data.hDevNames = IntPtr.Zero;
-            data.Flags = 0;
+            SafeNativeMethods.PRINTDLGX86 data = new SafeNativeMethods.PRINTDLGX86
+            {
+                lStructSize = Marshal.SizeOf(typeof(SafeNativeMethods.PRINTDLGX86)),
+                hwndOwner = IntPtr.Zero,
+                hDevMode = IntPtr.Zero,
+                hDevNames = IntPtr.Zero,
+                Flags = 0
+            };
             data.hwndOwner = IntPtr.Zero;
             data.hDC = IntPtr.Zero;
             data.nFromPage = 1;
@@ -675,17 +558,19 @@ namespace System.Drawing.Printing
             return data;
         }
 
-
         // Create a PRINTDLG with a few useful defaults.
         // Try to keep this consistent with PrintDialog.CreatePRINTDLG.
         private static SafeNativeMethods.PRINTDLG CreatePRINTDLG()
         {
-            SafeNativeMethods.PRINTDLG data = new SafeNativeMethods.PRINTDLG();
-            data.lStructSize = Marshal.SizeOf(typeof(SafeNativeMethods.PRINTDLG));
-            data.hwndOwner = IntPtr.Zero;
-            data.hDevMode = IntPtr.Zero;
-            data.hDevNames = IntPtr.Zero;
-            data.Flags = 0;
+            SafeNativeMethods.PRINTDLG data = new SafeNativeMethods.PRINTDLG
+            {
+                lStructSize = Marshal.SizeOf(typeof(SafeNativeMethods.PRINTDLG)),
+                hwndOwner = IntPtr.Zero,
+                hDevMode = IntPtr.Zero,
+                hDevNames = IntPtr.Zero,
+                Flags = 0
+            };
+
             data.hwndOwner = IntPtr.Zero;
             data.hDC = IntPtr.Zero;
             data.nFromPage = 1;
@@ -859,9 +744,8 @@ namespace System.Drawing.Printing
         /// </summary>
         public IntPtr GetHdevmode()
         {
-            // Don't assert unmanaged code -- anyone using handles should have unmanaged code permission
             IntPtr modeHandle = GetHdevmodeInternal();
-            _defaultPageSettings.CopyToHdevmode(modeHandle);
+            DefaultPageSettings.CopyToHdevmode(modeHandle);
             return modeHandle;
         }
 
@@ -877,9 +761,8 @@ namespace System.Drawing.Printing
             // Create DEVMODE
             int modeSize = SafeNativeMethods.DocumentProperties(NativeMethods.NullHandleRef, NativeMethods.NullHandleRef, printer, IntPtr.Zero, NativeMethods.NullHandleRef, 0);
             if (modeSize < 1)
-            {
                 throw new InvalidPrinterException(this);
-            }
+
             IntPtr handle = SafeNativeMethods.GlobalAlloc(SafeNativeMethods.GMEM_MOVEABLE, (uint)modeSize); // cannot be <0 anyway
             IntPtr pointer = SafeNativeMethods.GlobalLock(new HandleRef(null, handle));
 
@@ -899,7 +782,6 @@ namespace System.Drawing.Printing
 
             SafeNativeMethods.DEVMODE mode = (SafeNativeMethods.DEVMODE)Marshal.PtrToStructure(pointer, typeof(SafeNativeMethods.DEVMODE));
 
-
             if (_extrainfo != null)
             {
                 // guard against buffer overrun attacks (since design allows client to set a new printer name without updating the devmode)
@@ -910,6 +792,7 @@ namespace System.Drawing.Printing
                     Marshal.Copy(_extrainfo, 0, pointeroffset, _extrabytes);
                 }
             }
+
             if ((mode.dmFields & SafeNativeMethods.DM_COPIES) == SafeNativeMethods.DM_COPIES)
             {
                 if (_copies != -1)
@@ -937,7 +820,6 @@ namespace System.Drawing.Printing
                 SafeNativeMethods.GlobalUnlock(new HandleRef(null, handle));
                 return IntPtr.Zero;
             }
-
 
             SafeNativeMethods.GlobalUnlock(new HandleRef(null, handle));
             return handle;
@@ -992,10 +874,7 @@ namespace System.Drawing.Printing
         }
 
         // Handles creating then disposing a default DEVMODE
-        internal short GetModeField(ModeField field, short defaultValue)
-        {
-            return GetModeField(field, defaultValue, IntPtr.Zero);
-        }
+        internal short GetModeField(ModeField field, short defaultValue) => GetModeField(field, defaultValue, IntPtr.Zero);
 
         internal short GetModeField(ModeField field, short defaultValue, IntPtr modeHandle)
         {
@@ -1194,7 +1073,7 @@ namespace System.Drawing.Printing
         }
 
         // names is pointer to DEVNAMES
-        private static String ReadOneDEVNAME(IntPtr pDevnames, int slot)
+        private static string ReadOneDEVNAME(IntPtr pDevnames, int slot)
         {
             int offset = checked(Marshal.SystemDefaultCharSize * Marshal.ReadInt16((IntPtr)(checked((long)pDevnames + slot * 2))));
             string result = Marshal.PtrToStringAuto((IntPtr)(checked((long)pDevnames + offset)));
@@ -1256,9 +1135,9 @@ namespace System.Drawing.Printing
 
             IntPtr namesPointer = SafeNativeMethods.GlobalLock(new HandleRef(null, hdevnames));
 
-            _driverName = ReadOneDEVNAME(namesPointer, 0);
+            DriverName = ReadOneDEVNAME(namesPointer, 0);
             _printerName = ReadOneDEVNAME(namesPointer, 1);
-            _outputPort = ReadOneDEVNAME(namesPointer, 2);
+            OutputPort = ReadOneDEVNAME(namesPointer, 2);
 
             PrintDialogDisplayed = true;
 
@@ -1316,74 +1195,31 @@ namespace System.Drawing.Printing
             /// <summary>
             /// Gets a value indicating the number of paper sizes.
             /// </summary>
-            public int Count
-            {
-                get
-                {
-                    return _array.Length;
-                }
-            }
+            public int Count => _array.Length;
 
             /// <summary>
             /// Retrieves the PaperSize with the specified index.
             /// </summary>
-            public virtual PaperSize this[int index]
-            {
-                get
-                {
-                    return _array[index];
-                }
-            }
+            public virtual PaperSize this[int index] => _array[index];
 
-            public IEnumerator GetEnumerator()
-            {
-                return new ArrayEnumerator(_array, 0, Count);
-            }
+            public IEnumerator GetEnumerator() => new ArrayEnumerator(_array, 0, Count);
 
-            int ICollection.Count
-            {
-                get
-                {
-                    return Count;
-                }
-            }
+            int ICollection.Count => Count;
 
+            bool ICollection.IsSynchronized => false;
 
-            bool ICollection.IsSynchronized
-            {
-                get
-                {
-                    return false;
-                }
-            }
-
-            object ICollection.SyncRoot
-            {
-                get
-                {
-                    return this;
-                }
-            }
+            object ICollection.SyncRoot => this;
 
             void ICollection.CopyTo(Array array, int index)
-            {
-                Array.Copy(_array, index, array, 0, _array.Length);
-            }
+                => Array.Copy(_array, index, array, 0, _array.Length);
 
             public void CopyTo(PaperSize[] paperSizes, int index)
-            {
-                Array.Copy(_array, index, paperSizes, 0, _array.Length);
-            }
+                => Array.Copy(_array, index, paperSizes, 0, _array.Length);
 
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return GetEnumerator();
-            }
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-            [
-                EditorBrowsable(EditorBrowsableState.Never)
-            ]
-            public Int32 Add(PaperSize paperSize)
+            [EditorBrowsable(EditorBrowsableState.Never)]
+            public int Add(PaperSize paperSize)
             {
                 PaperSize[] newArray = new PaperSize[Count + 1];
                 ((ICollection)this).CopyTo(newArray, 0);
@@ -1400,80 +1236,36 @@ namespace System.Drawing.Printing
             /// <summary>
             /// Initializes a new instance of the <see cref='PaperSourceCollection'/> class.
             /// </summary>
-            public PaperSourceCollection(PaperSource[] array)
-            {
-                _array = array;
-            }
+            public PaperSourceCollection(PaperSource[] array) => _array = array;
 
             /// <summary>
             /// Gets a value indicating the number of paper sources.
             /// </summary>
-            public int Count
-            {
-                get
-                {
-                    return _array.Length;
-                }
-            }
+            public int Count => _array.Length;
 
             /// <summary>
             /// Gets the PaperSource with the specified index.
             /// </summary>
-            public virtual PaperSource this[int index]
-            {
-                get
-                {
-                    return _array[index];
-                }
-            }
+            public virtual PaperSource this[int index] => _array[index];
 
-            public IEnumerator GetEnumerator()
-            {
-                return new ArrayEnumerator(_array, 0, Count);
-            }
+            public IEnumerator GetEnumerator() => new ArrayEnumerator(_array, 0, Count);
 
-            int ICollection.Count
-            {
-                get
-                {
-                    return Count;
-                }
-            }
+            int ICollection.Count => Count;
 
+            bool ICollection.IsSynchronized => false;
 
-            bool ICollection.IsSynchronized
-            {
-                get
-                {
-                    return false;
-                }
-            }
-
-            object ICollection.SyncRoot
-            {
-                get
-                {
-                    return this;
-                }
-            }
+            object ICollection.SyncRoot => this;
 
             void ICollection.CopyTo(Array array, int index)
-            {
-                Array.Copy(_array, index, array, 0, _array.Length);
-            }
+                => Array.Copy(_array, index, array, 0, _array.Length);
 
             public void CopyTo(PaperSource[] paperSources, int index)
-            {
-                Array.Copy(_array, index, paperSources, 0, _array.Length);
-            }
+                => Array.Copy(_array, index, paperSources, 0, _array.Length);
 
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return GetEnumerator();
-            }
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
             [EditorBrowsable(EditorBrowsableState.Never)]
-            public Int32 Add(PaperSource paperSource)
+            public int Add(PaperSource paperSource)
             {
                 PaperSource[] newArray = new PaperSource[Count + 1];
                 ((ICollection)this).CopyTo(newArray, 0);
@@ -1498,71 +1290,31 @@ namespace System.Drawing.Printing
             /// <summary>
             /// Gets a value indicating the number of available printer resolutions.
             /// </summary>
-            public int Count
-            {
-                get
-                {
-                    return _array.Length;
-                }
-            }
+            public int Count => _array.Length;
 
             /// <summary>
             /// Retrieves the PrinterResolution with the specified index.
             /// </summary>
-            public virtual PrinterResolution this[int index]
-            {
-                get
-                {
-                    return _array[index];
-                }
-            }
+            public virtual PrinterResolution this[int index] => _array[index];
 
-            public IEnumerator GetEnumerator()
-            {
-                return new ArrayEnumerator(_array, 0, Count);
-            }
+            public IEnumerator GetEnumerator() => new ArrayEnumerator(_array, 0, Count);
 
-            int ICollection.Count
-            {
-                get
-                {
-                    return Count;
-                }
-            }
+            int ICollection.Count => Count;
 
-            bool ICollection.IsSynchronized
-            {
-                get
-                {
-                    return false;
-                }
-            }
+            bool ICollection.IsSynchronized => false;
 
-            object ICollection.SyncRoot
-            {
-                get
-                {
-                    return this;
-                }
-            }
+            object ICollection.SyncRoot => this;
 
             void ICollection.CopyTo(Array array, int index)
-            {
-                Array.Copy(_array, index, array, 0, _array.Length);
-            }
+                => Array.Copy(_array, index, array, 0, _array.Length);
 
             public void CopyTo(PrinterResolution[] printerResolutions, int index)
-            {
-                Array.Copy(_array, index, printerResolutions, 0, _array.Length);
-            }
+                => Array.Copy(_array, index, printerResolutions, 0, _array.Length);
 
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return GetEnumerator();
-            }
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
             [EditorBrowsable(EditorBrowsableState.Never)]
-            public Int32 Add(PrinterResolution printerResolution)
+            public int Add(PrinterResolution printerResolution)
             {
                 PrinterResolution[] newArray = new PrinterResolution[Count + 1];
                 ((ICollection)this).CopyTo(newArray, 0);
@@ -1574,12 +1326,12 @@ namespace System.Drawing.Printing
 
         public class StringCollection : ICollection
         {
-            private String[] _array;
+            private string[] _array;
 
             /// <summary>
             /// Initializes a new instance of the <see cref='StringCollection'/> class.
             /// </summary>
-            public StringCollection(String[] array)
+            public StringCollection(string[] array)
             {
                 _array = array;
             }
@@ -1587,76 +1339,31 @@ namespace System.Drawing.Printing
             /// <summary>
             /// Gets a value indicating the number of strings.
             /// </summary>
-            public int Count
-            {
-                get
-                {
-                    return _array.Length;
-                }
-            }
+            public int Count => _array.Length;
 
             /// <summary>
             /// Gets the string with the specified index.
             /// </summary>
-            public virtual String this[int index]
-            {
-                get
-                {
-                    return _array[index];
-                }
-            }
+            public virtual string this[int index] => _array[index];
 
-            public IEnumerator GetEnumerator()
-            {
-                return new ArrayEnumerator(_array, 0, Count);
-            }
+            public IEnumerator GetEnumerator() => new ArrayEnumerator(_array, 0, Count);
 
-            int ICollection.Count
-            {
-                get
-                {
-                    return Count;
-                }
-            }
+            int ICollection.Count => Count;
 
-            bool ICollection.IsSynchronized
-            {
-                get
-                {
-                    return false;
-                }
-            }
+            bool ICollection.IsSynchronized => false;
 
-            object ICollection.SyncRoot
-            {
-                get
-                {
-                    return this;
-                }
-            }
+            object ICollection.SyncRoot => this;
 
-            void ICollection.CopyTo(Array array, int index)
-            {
-                Array.Copy(_array, index, array, 0, _array.Length);
-            }
+            void ICollection.CopyTo(Array array, int index) => Array.Copy(_array, index, array, 0, _array.Length);
 
+            public void CopyTo(string[] strings, int index) => Array.Copy(_array, index, strings, 0, _array.Length);
 
-            public void CopyTo(string[] strings, int index)
-            {
-                Array.Copy(_array, index, strings, 0, _array.Length);
-            }
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-            IEnumerator IEnumerable.GetEnumerator()
+            [EditorBrowsable(EditorBrowsableState.Never)]
+            public int Add(string value)
             {
-                return GetEnumerator();
-            }
-
-            [
-                EditorBrowsable(EditorBrowsableState.Never)
-            ]
-            public Int32 Add(String value)
-            {
-                String[] newArray = new String[Count + 1];
+                string[] newArray = new string[Count + 1];
                 ((ICollection)this).CopyTo(newArray, 0);
                 newArray[Count] = value;
                 _array = newArray;
@@ -1666,11 +1373,11 @@ namespace System.Drawing.Printing
 
         private class ArrayEnumerator : IEnumerator
         {
-            private object[] _array;
-            private object _item;
+            private readonly object[] _array;
+            private readonly int _startIndex;
+            private readonly int _endIndex;
+
             private int _index;
-            private int _startIndex;
-            private int _endIndex;
 
             public ArrayEnumerator(object[] array, int startIndex, int count)
             {
@@ -1681,20 +1388,13 @@ namespace System.Drawing.Printing
                 _index = _startIndex;
             }
 
-            public object Current
-            {
-                get
-                {
-                    return _item;
-                }
-            }
-
+            public object Current { get; private set; }
 
             public bool MoveNext()
             {
                 if (_index >= _endIndex)
                     return false;
-                _item = _array[_index++];
+                Current = _array[_index++];
                 return true;
             }
 
@@ -1703,7 +1403,7 @@ namespace System.Drawing.Printing
                 // Position enumerator before first item 
 
                 _index = _startIndex;
-                _item = null;
+                Current = null;
             }
         }
     }

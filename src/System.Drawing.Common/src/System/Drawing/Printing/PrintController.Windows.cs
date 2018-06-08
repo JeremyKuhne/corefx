@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Security;
 
 namespace System.Drawing.Printing
 {
@@ -35,10 +34,7 @@ namespace System.Drawing.Printing
                 SetHandle(handle);
             }
 
-            public override bool IsInvalid
-            {
-                get { return handle == IntPtr.Zero; }
-            }
+            public override bool IsInvalid => handle == IntPtr.Zero;
 
             // Specifies how to free the handle.
             // The boolean returned should be true for success and false if the runtime
@@ -47,11 +43,9 @@ namespace System.Drawing.Printing
             protected override bool ReleaseHandle()
             {
                 if (!IsInvalid)
-                {
                     SafeNativeMethods.GlobalFree(new HandleRef(this, handle));
-                }
-                handle = IntPtr.Zero;
 
+                handle = IntPtr.Zero;
                 return true;
             }
 
@@ -68,7 +62,7 @@ namespace System.Drawing.Printing
 
         #endregion
 
-        internal SafeDeviceModeHandle modeHandle = null;
+        internal SafeDeviceModeHandle _modeHandle = null;
 
         /// <summary>
         /// Initializes a new instance of the <see cref='PrintController'/> class.
@@ -77,17 +71,10 @@ namespace System.Drawing.Printing
         {
         }
 
-
         /// <summary>
         /// This is new public property which notifies if this controller is used for PrintPreview.
         /// </summary>
-        public virtual bool IsPreview
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public virtual bool IsPreview => false;
 
         // WARNING: if you have nested PrintControllers, this method won't get called on the inner one.
         // Add initialization code to StartPrint or StartPage instead.
@@ -254,10 +241,9 @@ namespace System.Drawing.Printing
 
         private PrintPageEventArgs CreatePrintPageEvent(PageSettings pageSettings)
         {
-            Debug.Assert((modeHandle != null), "modeHandle is null.  Someone must have forgot to call base.StartPrint");
+            Debug.Assert((_modeHandle != null), "modeHandle is null.  Someone must have forgot to call base.StartPrint");
 
-
-            Rectangle pageBounds = pageSettings.GetBounds(modeHandle);
+            Rectangle pageBounds = pageSettings.GetBounds(_modeHandle);
             Rectangle marginBounds = new Rectangle(pageSettings.Margins.Left,
                                                    pageSettings.Margins.Top,
                                                    pageBounds.Width - (pageSettings.Margins.Left + pageSettings.Margins.Right),
@@ -273,7 +259,7 @@ namespace System.Drawing.Printing
         /// </summary>
         public virtual void OnStartPrint(PrintDocument document, PrintEventArgs e)
         {
-            modeHandle = (SafeDeviceModeHandle)document.PrinterSettings.GetHdevmode(document.DefaultPageSettings);
+            _modeHandle = (SafeDeviceModeHandle)document.PrinterSettings.GetHdevmode(document.DefaultPageSettings);
         }
 
         /// <summary>
@@ -296,10 +282,10 @@ namespace System.Drawing.Printing
         /// </summary>
         public virtual void OnEndPrint(PrintDocument document, PrintEventArgs e)
         {
-            Debug.Assert((modeHandle != null), "modeHandle is null.  Someone must have forgot to call base.StartPrint");
-            if (modeHandle != null)
+            Debug.Assert((_modeHandle != null), "modeHandle is null.  Someone must have forgot to call base.StartPrint");
+            if (_modeHandle != null)
             {
-                modeHandle.Close();
+                _modeHandle.Close();
             }
         }
     }

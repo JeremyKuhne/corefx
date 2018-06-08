@@ -2,12 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.ComponentModel;
-using System.Drawing.Imaging;
 using System.Drawing.Internal;
 using System.IO;
-using System.Runtime.InteropServices;
-using System.Security.Permissions;
 
 namespace System.Drawing
 {
@@ -17,9 +13,7 @@ namespace System.Drawing
         {
             Stream stream = type.Module.Assembly.GetManifestResourceStream(type, resource);
             if (stream == null)
-            {
                 throw new ArgumentException(SR.Format(SR.ResourceNotFound, type, resource));
-            }
 
             IntPtr bitmap = IntPtr.Zero;
             int status = SafeNativeMethods.Gdip.GdipCreateBitmapFromStream(new GPStream(stream), out bitmap);
@@ -34,21 +28,13 @@ namespace System.Drawing
         public Bitmap(Stream stream, bool useIcm)
         {
             if (stream == null)
-            {
                 throw new ArgumentNullException(nameof(stream));
-            }
 
             IntPtr bitmap = IntPtr.Zero;
-            int status;
+            int status = useIcm
+                ? SafeNativeMethods.Gdip.GdipCreateBitmapFromStreamICM(new GPStream(stream), out bitmap)
+                : SafeNativeMethods.Gdip.GdipCreateBitmapFromStream(new GPStream(stream), out bitmap);
 
-            if (useIcm)
-            {
-                status = SafeNativeMethods.Gdip.GdipCreateBitmapFromStreamICM(new GPStream(stream), out bitmap);
-            }
-            else
-            {
-                status = SafeNativeMethods.Gdip.GdipCreateBitmapFromStream(new GPStream(stream), out bitmap);
-            }
             SafeNativeMethods.Gdip.CheckStatus(status);
 
             ValidateImage(bitmap);

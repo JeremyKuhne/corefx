@@ -11,8 +11,6 @@ namespace System.Drawing.Printing
     /// </summary>
     public class PrintEventArgs : CancelEventArgs
     {
-        private PrintAction _printAction;
-
         /// <summary>
         /// Initializes a new instance of the <see cref='PrintEventArgs'/> class.
         /// </summary>
@@ -25,19 +23,13 @@ namespace System.Drawing.Printing
         /// </summary>
         internal PrintEventArgs(PrintAction action)
         {
-            _printAction = action;
+            PrintAction = action;
         }
 
         /// <summary>
         /// Specifies which <see cref='Printing.PrintAction'/> is causing this event.
         /// </summary>
-        public PrintAction PrintAction
-        {
-            get
-            {
-                return _printAction;
-            }
-        }
+        public PrintAction PrintAction { get; }
     }
 }
 

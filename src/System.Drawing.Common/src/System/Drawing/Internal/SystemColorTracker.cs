@@ -2,10 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
 using Microsoft.Win32;
 
 namespace System.Drawing.Internal
@@ -15,48 +12,48 @@ namespace System.Drawing.Internal
     internal static class SystemColorTracker
     {
         // when I tried the self host, it went over 500 but never over 1000.
-        private static int INITIAL_SIZE = 200;
+        private const int INITIAL_SIZE = 200;
         // If it gets this big, I seriously miscalculated the performance of this object.
-        private static int WARNING_SIZE = 100000;
-        private static float EXPAND_THRESHOLD = 0.75f;
-        private static int EXPAND_FACTOR = 2;
+        private const int WARNING_SIZE = 100000;
+        private const float EXPAND_THRESHOLD = 0.75f;
+        private const int EXPAND_FACTOR = 2;
 
-        private static WeakReference[] list = new WeakReference[INITIAL_SIZE];
-        private static int count = 0;
-        private static bool addedTracker;
-        private static object lockObject = new object();
+        private static WeakReference[] s_list = new WeakReference[INITIAL_SIZE];
+        private static int s_count = 0;
+        private static bool s_addedTracker;
+        private static readonly object s_lockObject = new object();
 
         internal static void Add(ISystemColorTracker obj)
         {
-            lock (lockObject)
+            lock (s_lockObject)
             {
-                Debug.Assert(list != null, "List is null");
-                Debug.Assert(list.Length > 0, "INITIAL_SIZE was initialized after list");
+                Debug.Assert(s_list != null, "List is null");
+                Debug.Assert(s_list.Length > 0, "INITIAL_SIZE was initialized after list");
 
-                if (list.Length == count)
+                if (s_list.Length == s_count)
                 {
                     GarbageCollectList();
                 }
 
-                if (!addedTracker)
+                if (!s_addedTracker)
                 {
-                    addedTracker = true;
+                    s_addedTracker = true;
                     SystemEvents.UserPreferenceChanged += new UserPreferenceChangedEventHandler(OnUserPreferenceChanged);
                 }
 
                 // Strictly speaking, we should grab a lock on this class.  But since the chances
                 // of a problem are so low, the consequences so minimal (something will get accidentally dropped
                 // from the list), and the performance of locking so lousy, we'll risk it.
-                int index = count;
-                count++;
+                int index = s_count;
+                s_count++;
 
                 // COM+ takes forever to Finalize() weak references, so it pays to reuse them.
-                if (list[index] == null)
-                    list[index] = new WeakReference(obj);
+                if (s_list[index] == null)
+                    s_list[index] = new WeakReference(obj);
                 else
                 {
-                    Debug.Assert(list[index].Target == null, "Trying to reuse a weak reference that isn't broken yet: list[" + index + "], length =" + list.Length);
-                    list[index].Target = obj;
+                    Debug.Assert(s_list[index].Target == null, "Trying to reuse a weak reference that isn't broken yet: list[" + index + "], length =" + s_list.Length);
+                    s_list[index].Target = obj;
                 }
             }
         }
@@ -68,35 +65,35 @@ namespace System.Drawing.Internal
 
             // Basic idea is to find a broken reference on the left side of the list, and swap it with
             // a valid reference on the right
-            int right = list.Length - 1;
+            int right = s_list.Length - 1;
             int left = 0;
 
-            int length = list.Length;
+            int length = s_list.Length;
 
             // Loop invariant: everything to the left of "left" is a valid reference,
             // and anything to the right of "right" is broken.
             for (;;)
             {
-                while (left < length && list[left].Target != null)
+                while (left < length && s_list[left].Target != null)
                     left++;
-                while (right >= 0 && list[right].Target == null)
+                while (right >= 0 && s_list[right].Target == null)
                     right--;
 
                 if (left >= right)
                 {
-                    count = left;
+                    s_count = left;
                     break;
                 }
 
-                WeakReference temp = list[left];
-                list[left] = list[right];
-                list[right] = temp;
+                WeakReference temp = s_list[left];
+                s_list[left] = s_list[right];
+                s_list[right] = temp;
 
                 left++;
                 right--;
             }
 
-            Debug.Assert(count >= 0 && count <= list.Length, "count not a legal index into list");
+            Debug.Assert(s_count >= 0 && s_count <= s_list.Length, "count not a legal index into list");
 
 #if DEBUG
             // Check loop invariant.
@@ -109,9 +106,9 @@ namespace System.Drawing.Internal
             //     Debug.Assert(list[i].Target != null, "Null found on the left side of the list");
             // }
 
-            for (int i = count; i < list.Length; i++)
+            for (int i = s_count; i < s_list.Length; i++)
             {
-                Debug.Assert(list[i].Target == null, "Partitioning didn't work");
+                Debug.Assert(s_list[i].Target == null, "Partitioning didn't work");
             }
 #endif
         }
@@ -120,13 +117,13 @@ namespace System.Drawing.Internal
         {
             CleanOutBrokenLinks();
 
-            if (count / (float)list.Length > EXPAND_THRESHOLD)
+            if (s_count / (float)s_list.Length > EXPAND_THRESHOLD)
             {
-                WeakReference[] newList = new WeakReference[list.Length * EXPAND_FACTOR];
-                list.CopyTo(newList, 0);
-                list = newList;
+                WeakReference[] newList = new WeakReference[s_list.Length * EXPAND_FACTOR];
+                s_list.CopyTo(newList, 0);
+                s_list = newList;
 
-                Debug.Assert(list.Length < WARNING_SIZE, "SystemColorTracker is using way more memory than expected.");
+                Debug.Assert(s_list.Length < WARNING_SIZE, "SystemColorTracker is using way more memory than expected.");
             }
         }
 
@@ -136,10 +133,10 @@ namespace System.Drawing.Internal
             // Update pens and brushes
             if (e.Category == UserPreferenceCategory.Color)
             {
-                for (int i = 0; i < count; i++)
+                for (int i = 0; i < s_count; i++)
                 {
-                    Debug.Assert(list[i] != null, "null value in active part of list");
-                    ISystemColorTracker tracker = (ISystemColorTracker)list[i].Target;
+                    Debug.Assert(s_list[i] != null, "null value in active part of list");
+                    ISystemColorTracker tracker = (ISystemColorTracker)s_list[i].Target;
                     if (tracker != null)
                     {
                         // If object still around

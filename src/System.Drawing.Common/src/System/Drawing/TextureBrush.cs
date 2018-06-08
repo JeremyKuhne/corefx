@@ -180,8 +180,7 @@ namespace System.Drawing
         {
             get
             {
-                int mode = 0;
-                int status = SafeNativeMethods.Gdip.GdipGetTextureWrapMode(new HandleRef(this, NativeBrush), out mode);
+                int status = SafeNativeMethods.Gdip.GdipGetTextureWrapMode(new HandleRef(this, NativeBrush), out int mode);
                 SafeNativeMethods.Gdip.CheckStatus(status);
 
                 return (WrapMode)mode;
@@ -202,8 +201,7 @@ namespace System.Drawing
         {
             get
             {
-                IntPtr image;
-                int status = SafeNativeMethods.Gdip.GdipGetTextureImage(new HandleRef(this, NativeBrush), out image);
+                int status = SafeNativeMethods.Gdip.GdipGetTextureImage(new HandleRef(this, NativeBrush), out IntPtr image);
                 SafeNativeMethods.Gdip.CheckStatus(status);
 
                 return Image.CreateImageObject(image);

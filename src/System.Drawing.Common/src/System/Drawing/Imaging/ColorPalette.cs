@@ -11,44 +11,24 @@ namespace System.Drawing.Imaging
     /// </summary>
     public sealed class ColorPalette
     {
-        // We don't provide a public constructor for ColorPalette because if we allow 
-        // arbitrary creation of color palettes you could in theroy not only change the color entries, but the size 
-        // of the palette and that is not valid for an image (meaning you cannot change the palette size for an image).  
-        // ColorPalettes are only valid for "indexed" images like GIFs.
-
-        private int _flags;
-        private Color[] _entries;
-
         /// <summary>
         /// Specifies how to interpret the color information in the array of colors.
         /// </summary>
-        public int Flags
-        {
-            get
-            {
-                return _flags;
-            }
-        }
+        public int Flags { get; private set; }
 
         /// <summary>
         /// Specifies an array of <see cref='Color'/> objects.
         /// </summary>
-        public Color[] Entries
-        {
-            get
-            {
-                return _entries;
-            }
-        }
+        public Color[] Entries { get; private set; }
 
         internal ColorPalette(int count)
         {
-            _entries = new Color[count];
+            Entries = new Color[count];
         }
 
         internal ColorPalette()
         {
-            _entries = new Color[1];
+            Entries = new Color[1];
         }
 
         internal void ConvertFromMemory(IntPtr memory)
@@ -58,19 +38,19 @@ namespace System.Drawing.Imaging
             //    UINT Count
             //    ARGB Entries[size]
 
-            _flags = Marshal.ReadInt32(memory);
+            Flags = Marshal.ReadInt32(memory);
 
             int size;
 
             size = Marshal.ReadInt32((IntPtr)((long)memory + 4));  // Marshal.SizeOf(size.GetType())
 
-            _entries = new Color[size];
+            Entries = new Color[size];
 
             for (int i = 0; i < size; i++)
             {
                 // use Marshal.SizeOf()
                 int argb = Marshal.ReadInt32((IntPtr)((long)memory + 8 + i * 4));
-                _entries[i] = Color.FromArgb(argb);
+                Entries[i] = Color.FromArgb(argb);
             }
         }
 
@@ -82,17 +62,17 @@ namespace System.Drawing.Imaging
             //    ARGB Entries[size]
 
             // use Marshal.SizeOf()
-            int length = _entries.Length;
+            int length = Entries.Length;
             IntPtr memory = Marshal.AllocHGlobal(checked(4 * (2 + length)));
 
-            Marshal.WriteInt32(memory, 0, _flags);
+            Marshal.WriteInt32(memory, 0, Flags);
             // use Marshal.SizeOf()
             Marshal.WriteInt32((IntPtr)checked((long)memory + 4), 0, length);
 
             for (int i = 0; i < length; i++)
             {
                 // use Marshal.SizeOf()
-                Marshal.WriteInt32((IntPtr)((long)memory + 4 * (i + 2)), 0, _entries[i].ToArgb());
+                Marshal.WriteInt32((IntPtr)((long)memory + 4 * (i + 2)), 0, Entries[i].ToArgb());
             }
 
             return memory;

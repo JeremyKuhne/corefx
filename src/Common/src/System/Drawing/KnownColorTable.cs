@@ -8,7 +8,6 @@ namespace System.Drawing
 {
 #if FEATURE_SYSTEM_EVENTS
     using Microsoft.Win32;
-    using System.Drawing.Internal;
 #endif
 
     static internal class KnownColorTable
@@ -16,9 +15,7 @@ namespace System.Drawing
         private static int[] s_colorTable;
         private static string[] s_colorNameTable;
 
-        /**
-         * Shift count and bit mask for A, R, G, B components
-         */
+        // Shift count and bit mask for A, R, G, B components
         private const int AlphaShift = 24;
         private const int RedShift = 16;
         private const int GreenShift = 8;
@@ -48,11 +45,8 @@ namespace System.Drawing
         private static void EnsureColorTable()
         {
             // no need to lock... worse case is a double create of the table...
-            //
             if (s_colorTable == null)
-            {
                 InitColorTable();
-            }
         }
 
         private static void InitColorTable()
@@ -225,7 +219,6 @@ namespace System.Drawing
             string[] values = new string[((int)KnownColor.MenuHighlight) + 1];
 
             // just consts...
-            //
             values[(int)KnownColor.ActiveBorder] = "ActiveBorder";
             values[(int)KnownColor.ActiveCaption] = "ActiveCaption";
             values[(int)KnownColor.ActiveCaptionText] = "ActiveCaptionText";

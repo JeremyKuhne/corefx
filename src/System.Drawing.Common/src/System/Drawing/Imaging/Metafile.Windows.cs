@@ -105,7 +105,7 @@ namespace System.Drawing.Imaging
         /// <summary>
         /// Initializes a new instance of the <see cref='Metafile'/> class from the specified handle to a device context.
         /// </summary>
-        public Metafile(IntPtr referenceHdc, EmfType emfType, String description)
+        public Metafile(IntPtr referenceHdc, EmfType emfType, string description)
         {
             IntPtr metafile = IntPtr.Zero;
 
@@ -150,7 +150,7 @@ namespace System.Drawing.Imaging
         /// Initializes a new instance of the <see cref='Metafile'/> class from the specified device context, bounded
         /// by the specified rectangle.
         /// </summary>
-        public Metafile(IntPtr referenceHdc, RectangleF frameRect, MetafileFrameUnit frameUnit, EmfType type, String description)
+        public Metafile(IntPtr referenceHdc, RectangleF frameRect, MetafileFrameUnit frameUnit, EmfType type, string description)
         {
             IntPtr metafile = IntPtr.Zero;
 
@@ -244,7 +244,7 @@ namespace System.Drawing.Imaging
         /// <summary>
         /// Initializes a new instance of the <see cref='Metafile'/> class with the specified filename.
         /// </summary>
-        public Metafile(string fileName, IntPtr referenceHdc, EmfType type, String description)
+        public Metafile(string fileName, IntPtr referenceHdc, EmfType type, string description)
         {
             // Called in order to emulate exception behavior from netfx related to invalid file paths.
             Path.GetFullPath(fileName);
@@ -298,7 +298,7 @@ namespace System.Drawing.Imaging
         /// Initializes a new instance of the <see cref='Metafile'/> class with the specified filename.
         /// </summary>
         public Metafile(string fileName, IntPtr referenceHdc, RectangleF frameRect,
-                        MetafileFrameUnit frameUnit, EmfType type, String description)
+                        MetafileFrameUnit frameUnit, EmfType type, string description)
         {
             // Called in order to emulate exception behavior from netfx related to invalid file paths.
             Path.GetFullPath(fileName);

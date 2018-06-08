@@ -79,8 +79,7 @@ namespace System.Drawing
             {
                 if (_color == Color.Empty)
                 {
-                    int colorARGB;
-                    int status = SafeNativeMethods.Gdip.GdipGetSolidFillColor(new HandleRef(this, NativeBrush), out colorARGB);
+                    int status = SafeNativeMethods.Gdip.GdipGetSolidFillColor(new HandleRef(this, NativeBrush), out int colorARGB);
                     SafeNativeMethods.Gdip.CheckStatus(status);
 
                     _color = Color.FromArgb(colorARGB);

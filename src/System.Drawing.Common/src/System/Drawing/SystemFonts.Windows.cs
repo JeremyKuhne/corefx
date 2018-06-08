@@ -17,14 +17,12 @@ namespace System.Drawing
                 Font captionFont = null;
 
                 var data = new NativeMethods.NONCLIENTMETRICS();
-                bool result = UnsafeNativeMethods.SystemParametersInfo(NativeMethods.SPI_GETNONCLIENTMETRICS, data.cbSize, data, 0);
-
-                if (result)
+                if (UnsafeNativeMethods.SystemParametersInfo(NativeMethods.SPI_GETNONCLIENTMETRICS, data.cbSize, data, 0))
                 {
                     captionFont = GetFontFromData(data.lfCaptionFont);
+                    captionFont.SetSystemFontName(nameof(CaptionFont));
                 }
 
-                captionFont.SetSystemFontName(nameof(CaptionFont));
                 return captionFont;
             }
         }
@@ -36,14 +34,13 @@ namespace System.Drawing
                 Font smcaptionFont = null;
 
                 var data = new NativeMethods.NONCLIENTMETRICS();
-                bool result = UnsafeNativeMethods.SystemParametersInfo(NativeMethods.SPI_GETNONCLIENTMETRICS, data.cbSize, data, 0);
 
-                if (result)
+                if (UnsafeNativeMethods.SystemParametersInfo(NativeMethods.SPI_GETNONCLIENTMETRICS, data.cbSize, data, 0))
                 {
                     smcaptionFont = GetFontFromData(data.lfSmCaptionFont);
+                    smcaptionFont.SetSystemFontName(nameof(SmallCaptionFont));
                 }
 
-                smcaptionFont.SetSystemFontName(nameof(SmallCaptionFont));
                 return smcaptionFont;
             }
         }
@@ -53,16 +50,14 @@ namespace System.Drawing
             get
             {
                 Font menuFont = null;
-
                 var data = new NativeMethods.NONCLIENTMETRICS();
-                bool result = UnsafeNativeMethods.SystemParametersInfo(NativeMethods.SPI_GETNONCLIENTMETRICS, data.cbSize, data, 0);
 
-                if (result)
+                if (UnsafeNativeMethods.SystemParametersInfo(NativeMethods.SPI_GETNONCLIENTMETRICS, data.cbSize, data, 0))
                 {
                     menuFont = GetFontFromData(data.lfMenuFont);
+                    menuFont.SetSystemFontName(nameof(MenuFont));
                 }
 
-                menuFont.SetSystemFontName(nameof(MenuFont));
                 return menuFont;
             }
         }
@@ -74,14 +69,13 @@ namespace System.Drawing
                 Font statusFont = null;
 
                 var data = new NativeMethods.NONCLIENTMETRICS();
-                bool result = UnsafeNativeMethods.SystemParametersInfo(NativeMethods.SPI_GETNONCLIENTMETRICS, data.cbSize, data, 0);
 
-                if (result)
+                if (UnsafeNativeMethods.SystemParametersInfo(NativeMethods.SPI_GETNONCLIENTMETRICS, data.cbSize, data, 0))
                 {
                     statusFont = GetFontFromData(data.lfStatusFont);
+                    statusFont.SetSystemFontName(nameof(StatusFont));
                 }
 
-                statusFont.SetSystemFontName(nameof(StatusFont));
                 return statusFont;
             }
         }
@@ -93,14 +87,13 @@ namespace System.Drawing
                 Font messageBoxFont = null;
 
                 var data = new NativeMethods.NONCLIENTMETRICS();
-                bool result = UnsafeNativeMethods.SystemParametersInfo(NativeMethods.SPI_GETNONCLIENTMETRICS, data.cbSize, data, 0);
 
-                if (result)
+                if (UnsafeNativeMethods.SystemParametersInfo(NativeMethods.SPI_GETNONCLIENTMETRICS, data.cbSize, data, 0))
                 {
                     messageBoxFont = GetFontFromData(data.lfMessageFont);
+                    messageBoxFont.SetSystemFontName(nameof(MessageBoxFont));
                 }
 
-                messageBoxFont.SetSystemFontName(nameof(MessageBoxFont));
                 return messageBoxFont;
             }
         }
@@ -124,14 +117,12 @@ namespace System.Drawing
                 Font iconTitleFont = null;
 
                 var itfont = new SafeNativeMethods.LOGFONT();
-                bool result = UnsafeNativeMethods.SystemParametersInfo(NativeMethods.SPI_GETICONTITLELOGFONT, Marshal.SizeOf(itfont), itfont, 0);
-
-                if (result)
+                if (UnsafeNativeMethods.SystemParametersInfo(NativeMethods.SPI_GETICONTITLELOGFONT, Marshal.SizeOf(itfont), itfont, 0))
                 {
                     iconTitleFont = GetFontFromData(itfont);
+                    iconTitleFont.SetSystemFontName(nameof(IconTitleFont));
                 }
 
-                iconTitleFont.SetSystemFontName(nameof(IconTitleFont));
                 return iconTitleFont;
             }
         }
@@ -141,7 +132,7 @@ namespace System.Drawing
             get
             {
                 Font defaultFont = null;
-                
+
                 // For Arabic systems, always return Tahoma 8.
                 bool systemDefaultLCIDIsArabic = (UnsafeNativeMethods.GetSystemDefaultLCID() & 0x3ff) == 0x0001;
                 if (systemDefaultLCIDIsArabic)
@@ -246,9 +237,7 @@ namespace System.Drawing
         private static Font GetFontFromData(SafeNativeMethods.LOGFONT logFont)
         {
             if (logFont == null)
-            {
                 return null;
-            }
 
             Font font = null;
             try

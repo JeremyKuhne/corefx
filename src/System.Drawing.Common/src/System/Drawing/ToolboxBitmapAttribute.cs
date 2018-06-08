@@ -56,14 +56,10 @@ namespace System.Drawing
         public override bool Equals(object value)
         {
             if (value == this)
-            {
                 return true;
-            }
 
             if (value is ToolboxBitmapAttribute attr)
-            {
                 return attr._smallImage == _smallImage && attr._largeImage == _largeImage;
-            }
 
             return false;
         }
@@ -75,9 +71,7 @@ namespace System.Drawing
         public Image GetImage(object component, bool large)
         {
             if (component != null)
-            {
                 return GetImage(component.GetType(), large);
-            }
 
             return null;
         }
@@ -153,9 +147,8 @@ namespace System.Drawing
         private static Image GetIconFromStream(Stream stream, bool large, bool scaled)
         {
             if (stream == null)
-            {
                 return null;
-            }
+
             Icon ico = new Icon(stream);
             Icon sizedico = new Icon(ico, large ? s_largeSize : s_smallSize);
             Bitmap b = sizedico.ToBitmap();
@@ -220,9 +213,7 @@ namespace System.Drawing
         private static Image GetBitmapFromResource(Type t, string bitmapname, bool large, bool scaled)
         {
             if (bitmapname == null)
-            {
                 return null;
-            }
 
             Image img = null;
 
@@ -250,9 +241,7 @@ namespace System.Drawing
         private static Image GetIconFromResource(Type t, string bitmapname, bool large, bool scaled)
         {
             if (bitmapname == null)
-            {
                 return null;
-            }
 
             return GetIconFromStream(BitmapSelector.GetResourceStream(t, bitmapname), large, scaled);
         }

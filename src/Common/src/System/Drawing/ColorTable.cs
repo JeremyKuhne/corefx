@@ -38,10 +38,6 @@ namespace System.Drawing
         internal static bool TryGetNamedColor(string name, out Color result) =>
             Colors.TryGetValue(name, out result);
 
-        internal static bool IsKnownNamedColor(string name)
-        {
-            Color result;
-            return Colors.TryGetValue(name, out result);
-        }
+        internal static bool IsKnownNamedColor(string name) => Colors.TryGetValue(name, out Color _);
     }
 }

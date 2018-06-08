@@ -54,7 +54,7 @@ namespace System.Drawing
             }
 
             IntPtr region = IntPtr.Zero;
-            int status = SafeNativeMethods.Gdip.GdipCreateRegionPath(new HandleRef(path, path.nativePath), out region);
+            int status = SafeNativeMethods.Gdip.GdipCreateRegionPath(new HandleRef(path, path._nativePath), out region);
             SafeNativeMethods.Gdip.CheckStatus(status);
 
             SetNativeRegion(region);
@@ -94,7 +94,7 @@ namespace System.Drawing
                 throw new ArgumentNullException(nameof(nativeRegion));
             }
 
-            this._nativeRegion = nativeRegion;
+            _nativeRegion = nativeRegion;
         }
 
         public Region Clone()
@@ -175,7 +175,7 @@ namespace System.Drawing
                 throw new ArgumentNullException(nameof(path));
             }
 
-            int status = SafeNativeMethods.Gdip.GdipCombineRegionPath(new HandleRef(this, _nativeRegion), new HandleRef(path, path.nativePath), CombineMode.Intersect);
+            int status = SafeNativeMethods.Gdip.GdipCombineRegionPath(new HandleRef(this, _nativeRegion), new HandleRef(path, path._nativePath), CombineMode.Intersect);
             SafeNativeMethods.Gdip.CheckStatus(status);
         }
 
@@ -211,7 +211,7 @@ namespace System.Drawing
                 throw new ArgumentNullException(nameof(path));
             }
 
-            int status = SafeNativeMethods.Gdip.GdipCombineRegionPath(new HandleRef(this, _nativeRegion), new HandleRef(path, path.nativePath), CombineMode.Union);
+            int status = SafeNativeMethods.Gdip.GdipCombineRegionPath(new HandleRef(this, _nativeRegion), new HandleRef(path, path._nativePath), CombineMode.Union);
             SafeNativeMethods.Gdip.CheckStatus(status);
         }
 
@@ -247,7 +247,7 @@ namespace System.Drawing
                 throw new ArgumentNullException(nameof(path));
             }
 
-            int status = SafeNativeMethods.Gdip.GdipCombineRegionPath(new HandleRef(this, _nativeRegion), new HandleRef(path, path.nativePath), CombineMode.Xor);
+            int status = SafeNativeMethods.Gdip.GdipCombineRegionPath(new HandleRef(this, _nativeRegion), new HandleRef(path, path._nativePath), CombineMode.Xor);
             SafeNativeMethods.Gdip.CheckStatus(status);
         }
 
@@ -283,7 +283,7 @@ namespace System.Drawing
                 throw new ArgumentNullException(nameof(path));
             }
 
-            int status = SafeNativeMethods.Gdip.GdipCombineRegionPath(new HandleRef(this, _nativeRegion), new HandleRef(path, path.nativePath),
+            int status = SafeNativeMethods.Gdip.GdipCombineRegionPath(new HandleRef(this, _nativeRegion), new HandleRef(path, path._nativePath),
                                                        CombineMode.Exclude);
             SafeNativeMethods.Gdip.CheckStatus(status);
         }
@@ -321,7 +321,7 @@ namespace System.Drawing
                 throw new ArgumentNullException(nameof(path));
             }
 
-            int status = SafeNativeMethods.Gdip.GdipCombineRegionPath(new HandleRef(this, _nativeRegion), new HandleRef(path, path.nativePath), CombineMode.Complement);
+            int status = SafeNativeMethods.Gdip.GdipCombineRegionPath(new HandleRef(this, _nativeRegion), new HandleRef(path, path._nativePath), CombineMode.Complement);
             SafeNativeMethods.Gdip.CheckStatus(status);
         }
 
@@ -395,8 +395,7 @@ namespace System.Drawing
                 throw new ArgumentNullException(nameof(g));
             }
 
-            int isEmpty;
-            int status = SafeNativeMethods.Gdip.GdipIsEmptyRegion(new HandleRef(this, _nativeRegion), new HandleRef(g, g.NativeGraphics), out isEmpty);
+            int status = SafeNativeMethods.Gdip.GdipIsEmptyRegion(new HandleRef(this, _nativeRegion), new HandleRef(g, g.NativeGraphics), out int isEmpty);
             SafeNativeMethods.Gdip.CheckStatus(status);
 
             return isEmpty != 0;
@@ -409,8 +408,7 @@ namespace System.Drawing
                 throw new ArgumentNullException(nameof(g));
             }
 
-            int isInfinite;
-            int status = SafeNativeMethods.Gdip.GdipIsInfiniteRegion(new HandleRef(this, _nativeRegion), new HandleRef(g, g.NativeGraphics), out isInfinite);
+            int status = SafeNativeMethods.Gdip.GdipIsInfiniteRegion(new HandleRef(this, _nativeRegion), new HandleRef(g, g.NativeGraphics), out int isInfinite);
             SafeNativeMethods.Gdip.CheckStatus(status);
 
             return isInfinite != 0;
@@ -428,8 +426,7 @@ namespace System.Drawing
                 throw new ArgumentNullException(nameof(region));
             }
 
-            int isEqual;
-            int status = SafeNativeMethods.Gdip.GdipIsEqualRegion(new HandleRef(this, _nativeRegion), new HandleRef(region, region._nativeRegion), new HandleRef(g, g.NativeGraphics), out isEqual);
+            int status = SafeNativeMethods.Gdip.GdipIsEqualRegion(new HandleRef(this, _nativeRegion), new HandleRef(region, region._nativeRegion), new HandleRef(g, g.NativeGraphics), out int isEqual);
             SafeNativeMethods.Gdip.CheckStatus(status);
 
             return isEqual != 0;
@@ -437,8 +434,7 @@ namespace System.Drawing
 
         public RegionData GetRegionData()
         {
-            int regionSize = 0;
-            int status = SafeNativeMethods.Gdip.GdipGetRegionDataSize(new HandleRef(this, _nativeRegion), out regionSize);
+            int status = SafeNativeMethods.Gdip.GdipGetRegionDataSize(new HandleRef(this, _nativeRegion), out int regionSize);
             SafeNativeMethods.Gdip.CheckStatus(status);
 
             if (regionSize == 0)
@@ -461,10 +457,9 @@ namespace System.Drawing
 
         public bool IsVisible(PointF point, Graphics g)
         {
-            int isVisible;
             int status = SafeNativeMethods.Gdip.GdipIsVisibleRegionPoint(new HandleRef(this, _nativeRegion), point.X, point.Y,
                                                           new HandleRef(g, (g == null) ? IntPtr.Zero : g.NativeGraphics),
-                                                          out isVisible);
+                                                          out int isVisible);
             SafeNativeMethods.Gdip.CheckStatus(status);
 
             return isVisible != 0;
@@ -478,11 +473,10 @@ namespace System.Drawing
 
         public bool IsVisible(RectangleF rect, Graphics g)
         {
-            int isVisible = 0;
             int status = SafeNativeMethods.Gdip.GdipIsVisibleRegionRect(new HandleRef(this, _nativeRegion), rect.X, rect.Y,
                                                          rect.Width, rect.Height,
                                                          new HandleRef(g, (g == null) ? IntPtr.Zero : g.NativeGraphics),
-                                                         out isVisible);
+                                                         out int isVisible);
             SafeNativeMethods.Gdip.CheckStatus(status);
 
             return isVisible != 0;
@@ -494,10 +488,9 @@ namespace System.Drawing
 
         public bool IsVisible(Point point, Graphics g)
         {
-            int isVisible = 0;
             int status = SafeNativeMethods.Gdip.GdipIsVisibleRegionPointI(new HandleRef(this, _nativeRegion), point.X, point.Y,
                                                            new HandleRef(g, (g == null) ? IntPtr.Zero : g.NativeGraphics),
-                                                           out isVisible);
+                                                           out int isVisible);
             SafeNativeMethods.Gdip.CheckStatus(status);
 
             return isVisible != 0;
@@ -511,11 +504,10 @@ namespace System.Drawing
 
         public bool IsVisible(Rectangle rect, Graphics g)
         {
-            int isVisible = 0;
             int status = SafeNativeMethods.Gdip.GdipIsVisibleRegionRectI(new HandleRef(this, _nativeRegion), rect.X, rect.Y,
                                                           rect.Width, rect.Height,
                                                           new HandleRef(g, (g == null) ? IntPtr.Zero : g.NativeGraphics),
-                                                          out isVisible);
+                                                          out int isVisible);
             SafeNativeMethods.Gdip.CheckStatus(status);
 
             return isVisible != 0;
@@ -528,9 +520,8 @@ namespace System.Drawing
                 throw new ArgumentNullException(nameof(matrix));
             }
 
-            int count = 0;
             int status = SafeNativeMethods.Gdip.GdipGetRegionScansCount(new HandleRef(this, _nativeRegion),
-                                                         out count,
+                                                         out int count,
                                                          new HandleRef(matrix, matrix.nativeMatrix));
             SafeNativeMethods.Gdip.CheckStatus(status);
 

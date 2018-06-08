@@ -104,10 +104,8 @@ namespace System.Drawing.Imaging
         public static ImageCodecInfo[] GetImageDecoders()
         {
             ImageCodecInfo[] imageCodecs;
-            int numDecoders;
-            int size;
 
-            int status = SafeNativeMethods.Gdip.GdipGetImageDecodersSize(out numDecoders, out size);
+            int status = SafeNativeMethods.Gdip.GdipGetImageDecodersSize(out int numDecoders, out int size);
 
             if (status != SafeNativeMethods.Gdip.Ok)
             {
@@ -138,10 +136,8 @@ namespace System.Drawing.Imaging
         public static ImageCodecInfo[] GetImageEncoders()
         {
             ImageCodecInfo[] imageCodecs;
-            int numEncoders;
-            int size;
 
-            int status = SafeNativeMethods.Gdip.GdipGetImageEncodersSize(out numEncoders, out size);
+            int status = SafeNativeMethods.Gdip.GdipGetImageEncodersSize(out int numEncoders, out int size);
 
             if (status != SafeNativeMethods.Gdip.Ok)
             {

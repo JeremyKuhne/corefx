@@ -131,9 +131,8 @@ namespace System.Drawing
         {
             get
             {
-                StringFormatFlags format;
 
-                int status = SafeNativeMethods.Gdip.GdipGetStringFormatFlags(new HandleRef(this, nativeFormat), out format);
+                int status = SafeNativeMethods.Gdip.GdipGetStringFormatFlags(new HandleRef(this, nativeFormat), out StringFormatFlags format);
 
                 if (status != SafeNativeMethods.Gdip.Ok)
                     throw SafeNativeMethods.Gdip.StatusException(status);
@@ -168,8 +167,7 @@ namespace System.Drawing
         {
             get
             {
-                StringAlignment alignment = 0;
-                int status = SafeNativeMethods.Gdip.GdipGetStringFormatAlign(new HandleRef(this, nativeFormat), out alignment);
+                int status = SafeNativeMethods.Gdip.GdipGetStringFormatAlign(new HandleRef(this, nativeFormat), out StringAlignment alignment);
 
                 if (status != SafeNativeMethods.Gdip.Ok)
                     throw SafeNativeMethods.Gdip.StatusException(status);
@@ -198,8 +196,7 @@ namespace System.Drawing
         {
             get
             {
-                StringAlignment alignment = 0;
-                int status = SafeNativeMethods.Gdip.GdipGetStringFormatLineAlign(new HandleRef(this, nativeFormat), out alignment);
+                int status = SafeNativeMethods.Gdip.GdipGetStringFormatLineAlign(new HandleRef(this, nativeFormat), out StringAlignment alignment);
 
                 if (status != SafeNativeMethods.Gdip.Ok)
                     throw SafeNativeMethods.Gdip.StatusException(status);
@@ -227,8 +224,7 @@ namespace System.Drawing
         {
             get
             {
-                HotkeyPrefix hotkeyPrefix;
-                int status = SafeNativeMethods.Gdip.GdipGetStringFormatHotkeyPrefix(new HandleRef(this, nativeFormat), out hotkeyPrefix);
+                int status = SafeNativeMethods.Gdip.GdipGetStringFormatHotkeyPrefix(new HandleRef(this, nativeFormat), out HotkeyPrefix hotkeyPrefix);
 
                 if (status != SafeNativeMethods.Gdip.Ok)
                     throw SafeNativeMethods.Gdip.StatusException(status);
@@ -280,8 +276,7 @@ namespace System.Drawing
         /// </summary>
         public float[] GetTabStops(out float firstTabOffset)
         {
-            int count = 0;
-            int status = SafeNativeMethods.Gdip.GdipGetStringFormatTabStopCount(new HandleRef(this, nativeFormat), out count);
+            int status = SafeNativeMethods.Gdip.GdipGetStringFormatTabStopCount(new HandleRef(this, nativeFormat), out int count);
 
             if (status != SafeNativeMethods.Gdip.Ok)
                 throw SafeNativeMethods.Gdip.StatusException(status);
@@ -306,8 +301,7 @@ namespace System.Drawing
         {
             get
             {
-                StringTrimming trimming;
-                int status = SafeNativeMethods.Gdip.GdipGetStringFormatTrimming(new HandleRef(this, nativeFormat), out trimming);
+                int status = SafeNativeMethods.Gdip.GdipGetStringFormatTrimming(new HandleRef(this, nativeFormat), out StringTrimming trimming);
 
                 if (status != SafeNativeMethods.Gdip.Ok)
                     throw SafeNativeMethods.Gdip.StatusException(status);
@@ -343,8 +337,7 @@ namespace System.Drawing
         {
             get
             {
-                IntPtr format;
-                int status = SafeNativeMethods.Gdip.GdipStringFormatGetGenericDefault(out format);
+                int status = SafeNativeMethods.Gdip.GdipStringFormatGetGenericDefault(out IntPtr format);
 
                 if (status != SafeNativeMethods.Gdip.Ok)
                     throw SafeNativeMethods.Gdip.StatusException(status);
@@ -368,8 +361,7 @@ namespace System.Drawing
         {
             get
             {
-                IntPtr format;
-                int status = SafeNativeMethods.Gdip.GdipStringFormatGetGenericTypographic(out format);
+                int status = SafeNativeMethods.Gdip.GdipStringFormatGetGenericTypographic(out IntPtr format);
 
                 if (status != SafeNativeMethods.Gdip.Ok)
                     throw SafeNativeMethods.Gdip.StatusException(status);
@@ -393,10 +385,8 @@ namespace System.Drawing
         {
             get
             {
-                StringDigitSubstitute digitSubstitute;
-                int lang = 0;
 
-                int status = SafeNativeMethods.Gdip.GdipGetStringFormatDigitSubstitution(new HandleRef(this, nativeFormat), out lang, out digitSubstitute);
+                int status = SafeNativeMethods.Gdip.GdipGetStringFormatDigitSubstitution(new HandleRef(this, nativeFormat), out int lang, out StringDigitSubstitute digitSubstitute);
 
                 if (status != SafeNativeMethods.Gdip.Ok)
                     throw SafeNativeMethods.Gdip.StatusException(status);
@@ -412,9 +402,7 @@ namespace System.Drawing
         {
             get
             {
-                StringDigitSubstitute digitSubstitute;
-                int language = 0;
-                int status = SafeNativeMethods.Gdip.GdipGetStringFormatDigitSubstitution(new HandleRef(this, nativeFormat), out language, out digitSubstitute);
+                int status = SafeNativeMethods.Gdip.GdipGetStringFormatDigitSubstitution(new HandleRef(this, nativeFormat), out int language, out StringDigitSubstitute digitSubstitute);
 
                 if (status != SafeNativeMethods.Gdip.Ok)
                     throw SafeNativeMethods.Gdip.StatusException(status);
@@ -425,8 +413,7 @@ namespace System.Drawing
 
         internal int GetMeasurableCharacterRangeCount()
         {
-            int cnt;
-            int status = SafeNativeMethods.Gdip.GdipGetStringFormatMeasurableCharacterRangeCount(new HandleRef(this, nativeFormat), out cnt);
+            int status = SafeNativeMethods.Gdip.GdipGetStringFormatMeasurableCharacterRangeCount(new HandleRef(this, nativeFormat), out int cnt);
 
             SafeNativeMethods.Gdip.CheckStatus(status);
             return cnt;

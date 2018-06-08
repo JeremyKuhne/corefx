@@ -12,8 +12,6 @@ namespace System.Drawing.Printing
     /// </summary>
     public partial class PrinterResolution
     {
-        private int _x;
-        private int _y;
         private PrinterResolutionKind _kind;
 
         /// <summary>
@@ -27,8 +25,8 @@ namespace System.Drawing.Printing
         internal PrinterResolution(PrinterResolutionKind kind, int x, int y)
         {
             _kind = kind;
-            _x = x;
-            _y = y;
+            X = x;
+            Y = y;
         }
 
         /// <summary>
@@ -36,7 +34,7 @@ namespace System.Drawing.Printing
         /// </summary>
         public PrinterResolutionKind Kind
         {
-            get { return _kind; }
+            get => _kind;
             set
             {
                 if (value < PrinterResolutionKind.High || value > PrinterResolutionKind.Custom)
@@ -51,32 +49,12 @@ namespace System.Drawing.Printing
         /// <summary>
         /// Gets the printer resolution in the horizontal direction, in dots per inch.
         /// </summary>
-        public int X
-        {
-            get
-            {
-                return _x;
-            }
-            set
-            {
-                _x = value;
-            }
-        }
+        public int X { get; set; }
 
         /// <summary>
         /// Gets the printer resolution in the vertical direction, in dots per inch.
         /// </summary>
-        public int Y
-        {
-            get
-            {
-                return _y;
-            }
-            set
-            {
-                _y = value;
-            }
-        }
+        public int Y { get; set; }
 
         /// <summary>
         /// Provides some interesting information about the PrinterResolution in String form.

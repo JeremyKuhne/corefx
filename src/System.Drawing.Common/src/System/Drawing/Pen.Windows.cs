@@ -25,9 +25,7 @@ namespace System.Drawing
             set
             {
                 if (_immutable)
-                {
                     throw new ArgumentException(SR.Format(SR.CantChangeImmutableObjects, nameof(Pen)));
-                }
 
                 int status = SafeNativeMethods.Gdip.GdipSetPenCustomStartCap(new HandleRef(this, NativePen),
                                                               new HandleRef(value, (value == null) ? IntPtr.Zero : value.nativeCap));
@@ -50,9 +48,7 @@ namespace System.Drawing
             set
             {
                 if (_immutable)
-                {
                     throw new ArgumentException(SR.Format(SR.CantChangeImmutableObjects, nameof(Pen)));
-                }
 
                 int status = SafeNativeMethods.Gdip.GdipSetPenCustomEndCap(
                     new HandleRef(this, NativePen),

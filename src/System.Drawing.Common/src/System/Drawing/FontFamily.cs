@@ -233,9 +233,7 @@ namespace System.Drawing
         public static FontFamily[] GetFamilies(Graphics graphics)
         {
             if (graphics == null)
-            {
                 throw new ArgumentNullException(nameof(graphics));
-            }
 
             return new InstalledFontCollection().Families;
         }
@@ -245,8 +243,7 @@ namespace System.Drawing
         /// </summary>
         public bool IsStyleAvailable(FontStyle style)
         {
-            int bresult;
-            int status = SafeNativeMethods.Gdip.GdipIsStyleAvailable(new HandleRef(this, NativeFamily), style, out bresult);
+            int status = SafeNativeMethods.Gdip.GdipIsStyleAvailable(new HandleRef(this, NativeFamily), style, out int bresult);
             SafeNativeMethods.Gdip.CheckStatus(status);
 
             return bresult != 0;
@@ -257,8 +254,7 @@ namespace System.Drawing
         /// </summary>
         public int GetEmHeight(FontStyle style)
         {
-            int result = 0;
-            int status = SafeNativeMethods.Gdip.GdipGetEmHeight(new HandleRef(this, NativeFamily), style, out result);
+            int status = SafeNativeMethods.Gdip.GdipGetEmHeight(new HandleRef(this, NativeFamily), style, out int result);
             SafeNativeMethods.Gdip.CheckStatus(status);
 
             return result;
@@ -269,8 +265,7 @@ namespace System.Drawing
         /// </summary>
         public int GetCellAscent(FontStyle style)
         {
-            int result = 0;
-            int status = SafeNativeMethods.Gdip.GdipGetCellAscent(new HandleRef(this, NativeFamily), style, out result);
+            int status = SafeNativeMethods.Gdip.GdipGetCellAscent(new HandleRef(this, NativeFamily), style, out int result);
             SafeNativeMethods.Gdip.CheckStatus(status);
 
             return result;
@@ -281,8 +276,7 @@ namespace System.Drawing
         /// </summary>
         public int GetCellDescent(FontStyle style)
         {
-            int result = 0;
-            int status = SafeNativeMethods.Gdip.GdipGetCellDescent(new HandleRef(this, NativeFamily), style, out result);
+            int status = SafeNativeMethods.Gdip.GdipGetCellDescent(new HandleRef(this, NativeFamily), style, out int result);
             SafeNativeMethods.Gdip.CheckStatus(status);
 
             return result;
@@ -294,8 +288,7 @@ namespace System.Drawing
         /// </summary>
         public int GetLineSpacing(FontStyle style)
         {
-            int result = 0;
-            int status = SafeNativeMethods.Gdip.GdipGetLineSpacing(new HandleRef(this, NativeFamily), style, out result);
+            int status = SafeNativeMethods.Gdip.GdipGetLineSpacing(new HandleRef(this, NativeFamily), style, out int result);
             SafeNativeMethods.Gdip.CheckStatus(status);
 
             return result;
