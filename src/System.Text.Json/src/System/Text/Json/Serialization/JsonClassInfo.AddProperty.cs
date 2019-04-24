@@ -25,7 +25,7 @@ namespace System.Text.Json.Serialization
 
             if (propertyInfo != null)
             {
-                _propertyRefs.Add(new PropertyRef(GetKey(jsonInfo.NameUsedToCompare), jsonInfo));
+                _propertyRefs.Add(new PropertyRef(PropertyRef.GetKey(jsonInfo.NameUsedToCompare), jsonInfo));
             }
             else
             {
