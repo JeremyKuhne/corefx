@@ -78,7 +78,6 @@ namespace System.Text.Json
             throw new FormatException(message);
         }
 
-        
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void ThrowInvalidOperationException_SerializationConverterNotCompatible(Type converterType, Type type)
         {

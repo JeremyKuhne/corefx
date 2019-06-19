@@ -33,7 +33,7 @@ namespace System.Text.Json
             }
 
             // Use a list for converters that implement CanConvert().
-            s_defaultConverters.Add(new JsonConverterEnum(treatAsString: false));
+            s_defaultConverters.Add(new JsonConverterEnum());
             // todo: s_defaultConverters.Add(new JsonConverterKeyValuePair());
 
             // We will likely add collection converters here in the future.
